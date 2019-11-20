@@ -6,6 +6,7 @@ package executor
 
 import (
 	"bytes"
+	"encoding/hex"
 
 	"github.com/33cn/chain33/common"
 	"github.com/33cn/chain33/types"
@@ -46,11 +47,11 @@ func checkReceiptExecOk(receipt *types.ReceiptData) bool {
 // 1, 主链+平行链 user.p.xx.paracross 交易组				混合跨链资产转移  paracross主链执行成功
 // 2, 平行链	    user.p.xx.paracross + user.p.xx.other   混合平行链组合    paracross主链执行成功
 // 3, 平行链     user.p.xx.other  交易组					混合平行链组合    other主链pack
-func filterParaTxGroup(title string, tx *types.Transaction, main *types.BlockDetail, index int, forkHeight int64) ([]*types.Transaction, int) {
+func filterParaTxGroup(cfg *types.Chain33Config, tx *types.Transaction, allTxs []*types.TxDetail, index int, mainBlockHeight, forkHeight int64) ([]*types.Transaction, int) {
 	var headIdx int
 
 	for i := index; i >= 0; i-- {
-		if bytes.Equal(tx.Header, main.Block.Txs[i].Hash()) {
+		if bytes.Equal(tx.Header, allTxs[i].Tx.Hash()) {
 			headIdx = i
 			break
 		}
@@ -58,49 +59,54 @@ func filterParaTxGroup(title string, tx *types.Transaction, main *types.BlockDet
 
 	endIdx := headIdx + int(tx.GroupCount)
 	for i := headIdx; i < endIdx; i++ {
-		if types.IsPara() && main.Block.Height < forkHeight {
-			if types.IsSpecificParaExecName(title, string(main.Block.Txs[i].Execer)) {
+		//缺省是在forkHeight之前与更老版本一致，不检查平行链交易,但有些特殊平行链6.2.0版本升级上来无更老版本且要求blockhash不变，则需与6.2.0保持一致，不检查
+		if cfg.IsPara() && mainBlockHeight < forkHeight && !types.Conf(cfg, pt.ParaPrefixConsSubConf).IsEnable(pt.ParaFilterIgnoreTxGroup) {
+			if types.IsParaExecName(string(allTxs[i].Tx.Execer)) {
 				continue
 			}
 		}
 
-		if !checkReceiptExecOk(main.Receipts[i]) {
+		if !checkReceiptExecOk(allTxs[i].Receipt) {
+			clog.Error("filterParaTxGroup rmv tx group", "txhash", hex.EncodeToString(allTxs[i].Tx.Hash()))
 			return nil, endIdx
 		}
 	}
 	//全部是平行链交易 或平行链在主链执行成功的tx
-	return main.Block.Txs[headIdx:endIdx], endIdx
+	var retTxs []*types.Transaction
+	for _, retTx := range allTxs[headIdx:endIdx] {
+		retTxs = append(retTxs, retTx.Tx)
+	}
+	return retTxs, endIdx
 }
 
 //FilterTxsForPara include some main tx in tx group before ForkParacrossCommitTx
-func FilterTxsForPara(title string, main *types.BlockDetail) []*types.Transaction {
+func FilterTxsForPara(cfg *types.Chain33Config, main *types.ParaTxDetail) []*types.Transaction {
 	var txs []*types.Transaction
-	forkHeight := getDappForkHeight(pt.ForkCommitTx)
-	for i := 0; i < len(main.Block.Txs); i++ {
-		tx := main.Block.Txs[i]
-		if types.IsSpecificParaExecName(title, string(tx.Execer)) {
-			if tx.GroupCount >= 2 {
-				mainTxs, endIdx := filterParaTxGroup(title, tx, main, i, forkHeight)
-				txs = append(txs, mainTxs...)
-				i = endIdx - 1
-				continue
-			}
-			//单独的paracross tx 如果主链执行失败也要排除, 6.2fork原因 没有排除 非user.p.xx.paracross的平行链交易
-			if main.Block.Height >= forkHeight && bytes.HasSuffix(tx.Execer, []byte(pt.ParaX)) && !checkReceiptExecOk(main.Receipts[i]) {
-				continue
-			}
-
-			txs = append(txs, tx)
+	forkHeight := pt.GetDappForkHeight(cfg, pt.ForkCommitTx)
+	for i := 0; i < len(main.TxDetails); i++ {
+		tx := main.TxDetails[i].Tx
+		if tx.GroupCount >= 2 {
+			mainTxs, endIdx := filterParaTxGroup(cfg, tx, main.TxDetails, i, main.Header.Height, forkHeight)
+			txs = append(txs, mainTxs...)
+			i = endIdx - 1
+			continue
 		}
+		//单独的paracross tx 如果主链执行失败也要排除, 6.2fork原因 没有排除 非user.p.xx.paracross的平行链交易
+		if main.Header.Height >= forkHeight && bytes.HasSuffix(tx.Execer, []byte(pt.ParaX)) && !checkReceiptExecOk(main.TxDetails[i].Receipt) {
+			clog.Error("FilterTxsForPara rmv tx", "txhash", hex.EncodeToString(tx.Hash()))
+			continue
+		}
+
+		txs = append(txs, tx)
 	}
 	return txs
 }
 
 // FilterParaCrossTxHashes only all para chain cross txs like xx.paracross exec
-func FilterParaCrossTxHashes(title string, txs []*types.Transaction) [][]byte {
+func FilterParaCrossTxHashes(txs []*types.Transaction) [][]byte {
 	var txHashs [][]byte
 	for _, tx := range txs {
-		if types.IsSpecificParaExecName(title, string(tx.Execer)) && bytes.HasSuffix(tx.Execer, []byte(pt.ParaX)) {
+		if types.IsParaExecName(string(tx.Execer)) && bytes.HasSuffix(tx.Execer, []byte(pt.ParaX)) {
 			txHashs = append(txHashs, tx.Hash())
 		}
 	}

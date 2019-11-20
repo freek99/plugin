@@ -4,8 +4,6 @@
 
 package types
 
-import "github.com/33cn/chain33/types"
-
 //retrieve
 const (
 	RetrieveBackup = iota + 1
@@ -35,8 +33,7 @@ var (
 		"Backup":  RetrieveActionBackup,
 		"Cancel":  RetrieveActionCancel,
 	}
-)
 
-func init() {
-	types.AllowUserExec = append(types.AllowUserExec, ExecerRetrieve)
-}
+	ForkRetriveAssetX = "ForkRetriveAsset"
+	ForkRetriveX      = "ForkRetrive"
+)

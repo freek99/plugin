@@ -34,8 +34,8 @@ func GetExecSymbol(order *pt.SellOrder) (string, string) {
 	return order.AssetExec, order.TokenSymbol
 }
 
-func checkAsset(height int64, exec, symbol string) bool {
-	if types.IsDappFork(height, pt.TradeX, pt.ForkTradeAssetX) {
+func checkAsset(cfg *types.Chain33Config, height int64, exec, symbol string) bool {
+	if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradeAssetX) {
 		if exec == "" || symbol == "" {
 			return false
 		}
@@ -47,10 +47,52 @@ func checkAsset(height int64, exec, symbol string) bool {
 	return true
 }
 
-func createAccountDB(height int64, db db.KV, exec, symbol string) (*account.DB, error) {
-	if types.IsDappFork(height, pt.TradeX, pt.ForkTradeAssetX) {
-		return account.NewAccountDB(exec, symbol, db)
+func checkPrice(cfg *types.Chain33Config, height int64, exec, symbol string) bool {
+	if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradePriceX) {
+		if exec == "" && symbol != "" || exec != "" && symbol == "" {
+			return false
+		}
+	} else {
+		if exec != "" || symbol != "" {
+			return false
+		}
+	}
+	return true
+}
+
+func notSameAsset(cfg *types.Chain33Config, height int64, assetExec, assetSymbol, priceExec, priceSymbol string) bool {
+	if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradePriceX) {
+		if assetExec == priceExec && assetSymbol == priceSymbol {
+			return false
+		}
+	}
+	return true
+}
+
+func createAccountDB(cfg *types.Chain33Config, height int64, db db.KV, exec, symbol string) (*account.DB, error) {
+	if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradeFixAssetDBX) {
+		if exec == "" {
+			exec = defaultAssetExec
+		}
+		return account.NewAccountDB(cfg, exec, symbol, db)
+	} else if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradeAssetX) {
+		return account.NewAccountDB(cfg, exec, symbol, db)
 	}
 
-	return account.NewAccountDB(defaultAssetExec, symbol, db)
+	return account.NewAccountDB(cfg, defaultAssetExec, symbol, db)
+}
+
+func createPriceDB(cfg *types.Chain33Config, height int64, db db.KV, exec, symbol string) (*account.DB, error) {
+	if cfg.IsDappFork(height, pt.TradeX, pt.ForkTradePriceX) {
+		// 为空默认使用 coins
+		if exec == "" {
+			acc := account.NewCoinsAccount(cfg)
+			acc.SetDB(db)
+			return acc, nil
+		}
+		return account.NewAccountDB(cfg, exec, symbol, db)
+	}
+	acc := account.NewCoinsAccount(cfg)
+	acc.SetDB(db)
+	return acc, nil
 }

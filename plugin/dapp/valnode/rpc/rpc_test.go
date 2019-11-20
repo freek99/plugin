@@ -11,26 +11,32 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"strings"
+
+	"github.com/33cn/chain33/client"
 	"github.com/33cn/chain33/client/mocks"
 	rpctypes "github.com/33cn/chain33/rpc/types"
 	"github.com/33cn/chain33/types"
 	vt "github.com/33cn/plugin/plugin/dapp/valnode/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"golang.org/x/net/context"
 )
 
-func newGrpc(api *mocks.QueueProtocolAPI) *channelClient {
+func newGrpc(api client.QueueProtocolAPI) *channelClient {
 	return &channelClient{
 		ChannelClient: rpctypes.ChannelClient{QueueProtocolAPI: api},
 	}
 }
 
-func newJrpc(api *mocks.QueueProtocolAPI) *Jrpc {
+func newJrpc(api client.QueueProtocolAPI) *Jrpc {
 	return &Jrpc{cli: newGrpc(api)}
 }
 
 func TestChannelClient_IsSync(t *testing.T) {
+	cfg := types.NewChain33Config(strings.Replace(types.GetDefaultCfgstring(), "Title=\"local\"", "Title=\"chain33\"", 1))
 	api := new(mocks.QueueProtocolAPI)
+	api.On("GetConfig", mock.Anything).Return(cfg, nil)
 	client := newGrpc(api)
 	client.Init("valnode", nil, nil, nil)
 	req := &types.ReqNil{}
@@ -52,7 +58,9 @@ func TestJrpc_IsSync(t *testing.T) {
 }
 
 func TestChannelClient_GetNodeInfo(t *testing.T) {
+	cfg := types.NewChain33Config(strings.Replace(types.GetDefaultCfgstring(), "Title=\"local\"", "Title=\"chain33\"", 1))
 	api := new(mocks.QueueProtocolAPI)
+	api.On("GetConfig", mock.Anything).Return(cfg, nil)
 	client := newGrpc(api)
 	client.Init("valnode", nil, nil, nil)
 	req := &types.ReqNil{}

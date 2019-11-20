@@ -7,6 +7,7 @@ package types
 import (
 	"errors"
 	"reflect"
+	"time"
 
 	//log "github.com/33cn/chain33/common/log/log15"
 	"github.com/33cn/chain33/types"
@@ -57,10 +58,19 @@ var TicketX = "ticket"
 
 func init() {
 	types.AllowUserExec = append(types.AllowUserExec, []byte(TicketX))
-	types.RegistorExecutor(TicketX, NewType())
-	types.RegisterDappFork(TicketX, "Enable", 0)
-	types.RegisterDappFork(TicketX, "ForkTicketId", 1062000)
-	types.RegisterDappFork(TicketX, "ForkTicketVrf", 1770000)
+	types.RegFork(TicketX, InitFork)
+	types.RegExec(TicketX, InitExecutor)
+
+}
+
+func InitFork(cfg *types.Chain33Config) {
+	cfg.RegisterDappFork(TicketX, "Enable", 0)
+	cfg.RegisterDappFork(TicketX, "ForkTicketId", 1062000)
+	cfg.RegisterDappFork(TicketX, "ForkTicketVrf", 1770000)
+}
+
+func InitExecutor(cfg *types.Chain33Config) {
+	types.RegistorExecutor(TicketX, NewType(cfg))
 }
 
 // TicketType ticket exec type
@@ -69,9 +79,10 @@ type TicketType struct {
 }
 
 // NewType new type
-func NewType() *TicketType {
+func NewType(cfg *types.Chain33Config) *TicketType {
 	c := &TicketType{}
 	c.SetChild(c)
+	c.SetConfig(cfg)
 	return c
 }
 
@@ -118,4 +129,35 @@ func (ticket *TicketType) GetTypeMap() map[string]int32 {
 		"Tclose":  TicketActionClose,
 		"Miner":   TicketActionMiner,
 	}
+}
+
+// TicketMinerParam
+type TicketMinerParam struct {
+	CoinDevFund              int64
+	CoinReward               int64
+	FutureBlockTime          int64
+	TicketPrice              int64
+	TicketFrozenTime         int64
+	TicketWithdrawTime       int64
+	TicketMinerWaitTime      int64
+	TargetTimespan           time.Duration
+	TargetTimePerBlock       time.Duration
+	RetargetAdjustmentFactor int64
+}
+
+// GetTicketMinerParam 获取ticket miner config params
+func GetTicketMinerParam(cfg *types.Chain33Config, height int64) *TicketMinerParam {
+	conf := types.Conf(cfg, "mver.consensus.ticket")
+	c := &TicketMinerParam{}
+	c.CoinDevFund = conf.MGInt("coinDevFund", height) * types.Coin
+	c.CoinReward = conf.MGInt("coinReward", height) * types.Coin
+	c.FutureBlockTime = conf.MGInt("futureBlockTime", height)
+	c.TicketPrice = conf.MGInt("ticketPrice", height) * types.Coin
+	c.TicketFrozenTime = conf.MGInt("ticketFrozenTime", height)
+	c.TicketWithdrawTime = conf.MGInt("ticketWithdrawTime", height)
+	c.TicketMinerWaitTime = conf.MGInt("ticketMinerWaitTime", height)
+	c.TargetTimespan = time.Duration(conf.MGInt("targetTimespan", height)) * time.Second
+	c.TargetTimePerBlock = time.Duration(conf.MGInt("targetTimePerBlock", height)) * time.Second
+	c.RetargetAdjustmentFactor = conf.MGInt("retargetAdjustmentFactor", height)
+	return c
 }

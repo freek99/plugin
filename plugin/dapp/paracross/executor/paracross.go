@@ -27,15 +27,16 @@ type Paracross struct {
 	drivers.DriverBase
 }
 
-func init() {
-	ety := types.LoadExecutorType(driverName)
-	ety.InitFuncList(types.ListMethod(&Paracross{}))
+//Init paracross exec register
+func Init(name string, cfg *types.Chain33Config, sub []byte) {
+	drivers.Register(cfg, GetName(), newParacross, cfg.GetDappFork(driverName, "Enable"))
+	InitExecType()
+	setPrefix()
 }
 
-//Init paracross exec register
-func Init(name string, sub []byte) {
-	drivers.Register(GetName(), newParacross, types.GetDappFork(driverName, "Enable"))
-	setPrefix()
+func InitExecType() {
+	ety := types.LoadExecutorType(driverName)
+	ety.InitFuncList(types.ListMethod(&Paracross{}))
 }
 
 //GetName return paracross name
@@ -68,7 +69,6 @@ func (c *Paracross) checkTxGroup(tx *types.Transaction, index int) ([]*types.Tra
 }
 
 func (c *Paracross) saveLocalParaTxs(tx *types.Transaction, isDel bool) (*types.LocalDBSet, error) {
-	var set types.LocalDBSet
 
 	var payload pt.ParacrossAction
 	err := types.Decode(tx.Payload, &payload)
@@ -80,10 +80,38 @@ func (c *Paracross) saveLocalParaTxs(tx *types.Transaction, isDel bool) (*types.
 	}
 
 	commit := payload.GetCommit()
-	crossTxHashs, crossTxResult, err := getCrossTxHashs(c.GetAPI(), commit)
+	crossTxHashs, crossTxResult, err := getCrossTxHashs(c.GetAPI(), commit.Status)
 	if err != nil {
 		return nil, err
 	}
+
+	return c.udpateLocalParaTxs(commit.Status.Title, commit.Status.Height, crossTxHashs, crossTxResult, isDel)
+
+}
+
+//无法获取到commit tx信息，从commitDone 结构里面构建
+func (c *Paracross) saveLocalParaTxsFork(commitDone *pt.ReceiptParacrossDone, isDel bool) (*types.LocalDBSet, error) {
+	status := &pt.ParacrossNodeStatus{
+		MainBlockHash:   commitDone.MainBlockHash,
+		MainBlockHeight: commitDone.MainBlockHeight,
+		Title:           commitDone.Title,
+		Height:          commitDone.Height,
+		BlockHash:       commitDone.BlockHash,
+		TxResult:        commitDone.TxResult,
+	}
+
+	crossTxHashs, crossTxResult, err := getCrossTxHashs(c.GetAPI(), status)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.udpateLocalParaTxs(commitDone.Title, commitDone.Height, crossTxHashs, crossTxResult, isDel)
+
+}
+
+func (c *Paracross) udpateLocalParaTxs(paraTitle string, paraHeight int64, crossTxHashs [][]byte, crossTxResult []byte, isDel bool) (*types.LocalDBSet, error) {
+	var set types.LocalDBSet
+
 	if len(crossTxHashs) == 0 {
 		return &set, nil
 	}
@@ -93,8 +121,8 @@ func (c *Paracross) saveLocalParaTxs(tx *types.Transaction, isDel bool) (*types.
 
 		paraTx, err := GetTx(c.GetAPI(), crossTxHashs[i])
 		if err != nil {
-			clog.Crit("paracross.Commit Load Tx failed", "para title", commit.Status.Title,
-				"para height", commit.Status.Height, "para tx index", i, "error", err, "txHash",
+			clog.Crit("paracross.Commit Load Tx failed", "para title", paraTitle,
+				"para height", paraHeight, "para tx index", i, "error", err, "txHash",
 				hex.EncodeToString(crossTxHashs[i]))
 			return nil, err
 		}
@@ -102,19 +130,19 @@ func (c *Paracross) saveLocalParaTxs(tx *types.Transaction, isDel bool) (*types.
 		var payload pt.ParacrossAction
 		err = types.Decode(paraTx.Tx.Payload, &payload)
 		if err != nil {
-			clog.Crit("paracross.Commit Decode Tx failed", "para title", commit.Status.Title,
-				"para height", commit.Status.Height, "para tx index", i, "error", err, "txHash",
+			clog.Crit("paracross.Commit Decode Tx failed", "para title", paraTitle,
+				"para height", paraHeight, "para tx index", i, "error", err, "txHash",
 				hex.EncodeToString(crossTxHashs[i]))
 			return nil, err
 		}
 		if payload.Ty == pt.ParacrossActionAssetTransfer {
-			kv, err := c.updateLocalAssetTransfer(tx, paraTx.Tx, success, isDel)
+			kv, err := c.updateLocalAssetTransfer(paraHeight, paraTx.Tx, success, isDel)
 			if err != nil {
 				return nil, err
 			}
 			set.KV = append(set.KV, kv)
 		} else if payload.Ty == pt.ParacrossActionAssetWithdraw {
-			kv, err := c.initLocalAssetWithdraw(tx, paraTx.Tx, true, success, isDel)
+			kv, err := c.initLocalAssetWithdraw(paraHeight, paraTx.Tx, true, success, isDel)
 			if err != nil {
 				return nil, err
 			}
@@ -123,19 +151,6 @@ func (c *Paracross) saveLocalParaTxs(tx *types.Transaction, isDel bool) (*types.
 	}
 
 	return &set, nil
-}
-
-func getCommitHeight(payload []byte) (int64, error) {
-	var a pt.ParacrossAction
-	err := types.Decode(payload, &a)
-	if err != nil {
-		return 0, err
-	}
-	if a.GetCommit() == nil {
-		return 0, types.ErrInvalidParam
-	}
-
-	return a.GetCommit().Status.Height, nil
 }
 
 func (c *Paracross) initLocalAssetTransfer(tx *types.Transaction, success, isDel bool) (*types.KeyValue, error) {
@@ -185,7 +200,7 @@ func (c *Paracross) initLocalAssetTransfer(tx *types.Transaction, success, isDel
 	return &types.KeyValue{Key: key, Value: types.Encode(&asset)}, nil
 }
 
-func (c *Paracross) initLocalAssetWithdraw(txCommit, tx *types.Transaction, isWithdraw, success, isDel bool) (*types.KeyValue, error) {
+func (c *Paracross) initLocalAssetWithdraw(paraHeight int64, tx *types.Transaction, isWithdraw, success, isDel bool) (*types.KeyValue, error) {
 	key := calcLocalAssetKey(tx.Hash())
 	if isDel {
 		c.GetLocalDB().Set(key, nil)
@@ -198,10 +213,7 @@ func (c *Paracross) initLocalAssetWithdraw(txCommit, tx *types.Transaction, isWi
 	if err != nil {
 		return nil, err
 	}
-	asset.ParaHeight, err = getCommitHeight(txCommit.Payload)
-	if err != nil {
-		return nil, err
-	}
+	asset.ParaHeight = paraHeight
 
 	var payload pt.ParacrossAction
 	err = types.Decode(tx.Payload, &payload)
@@ -239,7 +251,7 @@ func (c *Paracross) initLocalAssetWithdraw(txCommit, tx *types.Transaction, isWi
 	return &types.KeyValue{Key: key, Value: types.Encode(&asset)}, nil
 }
 
-func (c *Paracross) updateLocalAssetTransfer(txCommit, tx *types.Transaction, success, isDel bool) (*types.KeyValue, error) {
+func (c *Paracross) updateLocalAssetTransfer(paraHeight int64, tx *types.Transaction, success, isDel bool) (*types.KeyValue, error) {
 	clog.Debug("para execLocal", "tx hash", hex.EncodeToString(tx.Hash()))
 	key := calcLocalAssetKey(tx.Hash())
 
@@ -253,10 +265,8 @@ func (c *Paracross) updateLocalAssetTransfer(txCommit, tx *types.Transaction, su
 		panic(err)
 	}
 	if !isDel {
-		asset.ParaHeight, err = getCommitHeight(txCommit.Payload)
-		if err != nil {
-			return nil, err
-		}
+		asset.ParaHeight = paraHeight
+
 		asset.CommitDoneHeight = c.GetHeight()
 		asset.Success = success
 	} else {
@@ -271,7 +281,8 @@ func (c *Paracross) updateLocalAssetTransfer(txCommit, tx *types.Transaction, su
 //IsFriend call exec is same seariase exec
 func (c *Paracross) IsFriend(myexec, writekey []byte, tx *types.Transaction) bool {
 	//不允许平行链
-	if types.IsPara() {
+	cfg := c.GetAPI().GetConfig()
+	if cfg.IsPara() {
 		return false
 	}
 	//friend 调用必须是自己在调用
@@ -290,7 +301,8 @@ func (c *Paracross) allow(tx *types.Transaction, index int) error {
 	// 增加新的规则: 在主链执行器带着title的 asset-transfer/asset-withdraw 交易允许执行
 	// 1. user.p.${tilte}.${paraX}
 	// 1. payload 的 actionType = t/w
-	if !types.IsPara() && c.allowIsParaTx(tx.Execer) {
+	cfg := c.GetAPI().GetConfig()
+	if !cfg.IsPara() && c.allowIsParaTx(tx.Execer) {
 		var payload pt.ParacrossAction
 		err := types.Decode(tx.Payload, &payload)
 		if err != nil {
@@ -299,7 +311,7 @@ func (c *Paracross) allow(tx *types.Transaction, index int) error {
 		if payload.Ty == pt.ParacrossActionAssetTransfer || payload.Ty == pt.ParacrossActionAssetWithdraw {
 			return nil
 		}
-		if types.IsDappFork(c.GetHeight(), pt.ParaX, pt.ForkCommitTx) {
+		if cfg.IsDappFork(c.GetHeight(), pt.ParaX, pt.ForkCommitTx) {
 			if payload.Ty == pt.ParacrossActionCommit || payload.Ty == pt.ParacrossActionNodeConfig ||
 				payload.Ty == pt.ParacrossActionNodeGroupApply {
 				return nil

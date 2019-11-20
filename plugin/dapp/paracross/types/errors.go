@@ -49,4 +49,12 @@ var (
 	ErrParaNodeOpStatusWrong = errors.New("ErrParaNodeOpStatusWrong")
 	//ErrParaConsensStopBlocksNotReach consensus stop blocks not reach
 	ErrParaConsensStopBlocksNotReach = errors.New("ErrParaConsensStopBlocksNotReach")
+	//ErrForkHeightNotReach fork height not reach
+	ErrForkHeightNotReach = errors.New("ErrForkHeightNotReach")
+	//ErrHeightHasPast height has past
+	ErrHeightHasPast = errors.New("ErrHeightHasPast")
+	// ErrKeyNotExist config key not exist
+	ErrKeyNotExist = errors.New("ErrKeyNotExist")
+	// ErrConsensClosed consensus closed
+	ErrConsensClosed = errors.New("ErrConsensClosed")
 )

@@ -76,8 +76,16 @@ var mapSignName2Type = map[string]int{
 func init() {
 	// init executor type
 	types.AllowUserExec = append(types.AllowUserExec, []byte(PrivacyX))
-	types.RegistorExecutor(PrivacyX, NewType())
-	types.RegisterDappFork(PrivacyX, "Enable", 980000)
+	types.RegFork(PrivacyX, InitFork)
+	types.RegExec(PrivacyX, InitExecutor)
+}
+
+func InitFork(cfg *types.Chain33Config) {
+	cfg.RegisterDappFork(PrivacyX, "Enable", 980000)
+}
+
+func InitExecutor(cfg *types.Chain33Config) {
+	types.RegistorExecutor(PrivacyX, NewType(cfg))
 }
 
 // PrivacyType declare PrivacyType class
@@ -86,9 +94,10 @@ type PrivacyType struct {
 }
 
 // NewType create PrivacyType object
-func NewType() *PrivacyType {
+func NewType(cfg *types.Chain33Config) *PrivacyType {
 	c := &PrivacyType{}
 	c.SetChild(c)
+	c.SetConfig(cfg)
 	return c
 }
 
@@ -202,6 +211,18 @@ func (action *PrivacyAction) GetTokenName() string {
 		return action.GetPrivacy2Privacy().GetTokenname()
 	} else if action.GetTy() == ActionPrivacy2Public && action.GetPrivacy2Public() != nil {
 		return action.GetPrivacy2Public().GetTokenname()
+	}
+	return ""
+}
+
+// GetAssertExec get assert exec
+func (action *PrivacyAction) GetAssertExec() string {
+	if action.GetTy() == ActionPublic2Privacy && action.GetPublic2Privacy() != nil {
+		return action.GetPublic2Privacy().GetAssetExec()
+	} else if action.GetTy() == ActionPrivacy2Privacy && action.GetPrivacy2Privacy() != nil {
+		return action.GetPrivacy2Privacy().GetAssetExec()
+	} else if action.GetTy() == ActionPrivacy2Public && action.GetPrivacy2Public() != nil {
+		return action.GetPrivacy2Public().GetAssetExec()
 	}
 	return ""
 }

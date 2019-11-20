@@ -80,6 +80,8 @@ function base_init() {
 
     sed -i $sedfix 's/^powLimitBits=.*/powLimitBits="0x1f2fffff"/g' chain33.toml
     sed -i $sedfix 's/^targetTimePerBlock=.*/targetTimePerBlock=1/g' chain33.toml
+    sed -i $sedfix 's/^targetTimespan=.*/targetTimespan=10000000/g' chain33.toml
+    sed -i $sedfix 's/^isLevelFee=.*/isLevelFee=false/g' chain33.toml
 
     # p2p
     sed -i $sedfix 's/^seeds=.*/seeds=["chain33:13802","chain32:13802","chain31:13802"]/g' chain33.toml
@@ -102,6 +104,9 @@ function base_init() {
 
     # ticket
     sed -i $sedfix 's/^ticketPrice =.*/ticketPrice = 10000/g' chain33.toml
+
+    #relay genesis
+    sed -i $sedfix 's/^genesis="12qyocayNF7.*/genesis="1G5Cjy8LuQex2fuYv3gzb7B8MxAnxLEqt3"/g' chain33.toml
 
 }
 
@@ -128,13 +133,13 @@ function start() {
     ${CLI} net info
 
     ${CLI} net peer_info
-    local count=100
+    local count=1000
     while [ $count -gt 0 ]; do
         peersCount=$(${CLI} net peer_info | jq '.[] | length')
         if [ "${peersCount}" -ge 2 ]; then
             break
         fi
-        sleep 5
+        sleep 1
         ((count--))
         echo "peers error: peersCount=${peersCount}"
     done
@@ -180,15 +185,11 @@ function miner() {
         exit 1
     fi
 
-    sleep 1
-
     echo "=========== # unlock wallet ============="
     result=$(${1} wallet unlock -p 1314fuzamei -t 0 | jq ".isok")
     if [ "${result}" = "false" ]; then
         exit 1
     fi
-
-    sleep 1
 
     echo "=========== # import private key returnAddr ============="
     result=$(${1} account import_key -k CC38546E9E659D15E6B4893F0AB32A06D103931A8230B0BDE71459D2B27D6944 -l returnAddr | jq ".label")
@@ -197,8 +198,6 @@ function miner() {
         exit 1
     fi
 
-    sleep 1
-
     echo "=========== # import private key mining ============="
     result=$(${1} account import_key -k 4257D8692EF7FE13C68B65D6A52F03933DB2FA5CE8FAF210B5B8B80C721CED01 -l minerAddr | jq ".label")
     echo "${result}"
@@ -206,10 +205,8 @@ function miner() {
         exit 1
     fi
 
-    sleep 1
-
     echo "=========== # close auto mining ============="
-    result=$(${1} wallet auto_mine -f 0 | jq ".isok")
+    result=$(${1} wallet auto_mine -f 1 | jq ".isok")
     if [ "${result}" = "false" ]; then
         exit 1
     fi
@@ -229,9 +226,55 @@ function block_wait() {
             break
         fi
         count=$((count + 1))
-        sleep 1
+        sleep 0.1
     done
-    echo "wait new block $count s, cur height=$expect,old=$cur_height"
+    echo "wait new block $count/10 s, cur height=$expect,old=$cur_height"
+}
+
+function tx_wait() {
+    if [ "$#" -lt 2 ]; then
+        echo "wrong tx_wait params"
+        exit 1
+    fi
+    local req=\"${2}\"
+    txhash=$(${1} tx query -s "${2}" | jq ".tx.hash")
+    local count=0
+    while true; do
+        txhash=$(${1} tx query -s "${2}" | jq ".tx.hash")
+        if [ "${txhash}" != "${req}" ]; then
+            count=$((count + 1))
+            echo "${txhash}" "${req}" "${count}"
+            sleep 0.1
+        else
+            RAW_TX_HASH=$txhash
+            echo "====query tx=$RAW_TX_HASH success"
+            break
+        fi
+    done
+}
+function block_wait2height() {
+    if [ "$#" -lt 3 ]; then
+        echo "wrong block_wait params"
+        exit 1
+    fi
+    local count=0
+    local new_height=0
+    local expect=${2}
+    local isPara=${3}
+
+    while true; do
+        new_height=$(${1} block last_header | jq ".height")
+        if [ "$isPara" == "1" ]; then
+            ${1} para blocks -s "$new_height" -e "$new_height"
+            new_height=$(${1} para blocks -s "$new_height" -e "$new_height" | jq ".items[0].mainHeight")
+        fi
+        if [ "${new_height}" -ge "${expect}" ]; then
+            break
+        fi
+        count=$((count + 1))
+        sleep 0.1
+    done
+    echo "wait new block $count/10 s, cur_height=$new_height,expect=$expect"
 }
 
 function check_docker_status() {
@@ -260,7 +303,7 @@ function check_docker_container() {
 function sync_status() {
     echo "=========== query sync status========== "
     local sync_status
-    local count=100
+    local count=1000
     local wait_sec=0
     while [ $count -gt 0 ]; do
         sync_status=$(${1} net is_sync)
@@ -273,9 +316,9 @@ function sync_status() {
         fi
         ((count--))
         wait_sec=$((wait_sec + 1))
-        sleep 1
+        sleep 0.1
     done
-    echo "sync wait  ${wait_sec} s"
+    echo "sync wait  ${wait_sec}/10 s"
 }
 
 function sync() {
@@ -315,7 +358,8 @@ function transfer() {
     echo "=========== # withdraw ============="
     hash=$(${1} send coins transfer -a 2 -n deposit -t 1wvmD6RNHzwhY4eN75WnM6JcaAvNQ4nHx -k CC38546E9E659D15E6B4893F0AB32A06D103931A8230B0BDE71459D2B27D6944)
     echo "${hash}"
-    block_wait "${1}" 1
+    #    block_wait "${1}" 2
+    tx_wait "${1}" "${hash}"
     before=$(${1} account balance -a 14KEKbYtKKQm4wMthSK9J4La4nAiidGozt -e retrieve | jq -r ".balance")
     if [ "${before}" == "0.0000" ]; then
         echo "wrong ticket balance, should not be zero"
@@ -324,7 +368,8 @@ function transfer() {
 
     hash=$(${1} send coins withdraw -a 1 -n withdraw -e retrieve -k CC38546E9E659D15E6B4893F0AB32A06D103931A8230B0BDE71459D2B27D6944)
     echo "${hash}"
-    block_wait "${1}" 1
+    #    block_wait "${1}" 1
+    tx_wait "${1}" "${hash}"
     txs=$(${1} tx query_hash -s "${hash}" | jq ".txs")
     if [ "${txs}" == "null" ]; then
         echo "withdraw cannot find tx"
@@ -333,10 +378,22 @@ function transfer() {
 
     hash=$(${1} send coins transfer -a 1000 -n transfer -t 1E5saiXVb9mW8wcWUUZjsHJPZs5GmdzuSY -k 4257D8692EF7FE13C68B65D6A52F03933DB2FA5CE8FAF210B5B8B80C721CED01)
     echo "${hash}"
-    block_wait "${1}" 1
+    #    block_wait "${1}" 1
+    tx_wait "${1}" "${hash}"
 }
 
 function dapp_test_address() {
+    echo "=========== # allocation for ticket rpc test ============="
+    hash=$(${1} send coins transfer -a 8600 -n transfer -t 1NNaYHkscJaLJ2wUrFNeh6cQXBS4TrFYeB -k 56942AD84CCF4788ED6DACBC005A1D0C4F91B63BCF0C99A02BE03C8DEAE71138)
+    echo "${hash}"
+
+    tx_wait "${1}" "${hash}"
+
+    hash=$(${1} send coins transfer -a 1500 -n transfer -t 1NNaYHkscJaLJ2wUrFNeh6cQXBS4TrFYeB -k 2116459C0EC8ED01AA0EEAE35CAC5C96F94473F7816F114873291217303F6989)
+    echo "${hash}"
+
+    tx_wait "${1}" "${hash}"
+
     echo "=========== # import private key dapptest1 mining ============="
     result=$(${1} account import_key -k 56942AD84CCF4788ED6DACBC005A1D0C4F91B63BCF0C99A02BE03C8DEAE71138 -l dapptest1 | jq ".label")
     echo "${result}"
@@ -344,20 +401,26 @@ function dapp_test_address() {
         exit 1
     fi
 
-    sleep 1
-
     echo "=========== # import private key dapptest2 mining ============="
     result=$(${1} account import_key -k 2116459C0EC8ED01AA0EEAE35CAC5C96F94473F7816F114873291217303F6989 -l dapptest2 | jq ".label")
     echo "${result}"
     if [ -z "${result}" ]; then
         exit 1
     fi
+    result=$(${1} account import_key -k 9d315182e56fde7fadb94408d360203894e5134216944e858f9b31f70e9ecf40 -l rpctestpooladdr | jq ".label")
+    echo "${result}"
+    if [ -z "${result}" ]; then
+        exit 1
+    fi
 
-    sleep 1
-
-    hash=$(${1} send coins transfer -a 1500 -n transfer -t 1PUiGcbsccfxW3zuvHXZBJfznziph5miAo -k 2116459C0EC8ED01AA0EEAE35CAC5C96F94473F7816F114873291217303F6989)
-    echo "${hash}"
     block_wait "${1}" 1
+
+    #total allocation for rpc test
+    hash=$(${1} send coins transfer -a 8000 -n transfer -t 1PcGKYYoLn1PLLJJodc1UpgWGeFAQasAkx -k 2116459C0EC8ED01AA0EEAE35CAC5C96F94473F7816F114873291217303F6989)
+    echo "${hash}"
+
+    #    block_wait "${1}" 1
+    tx_wait "${1}" "${hash}"
 }
 
 function base_config() {
@@ -405,7 +468,7 @@ function main() {
     dapp_run test "${ip}"
 
     ### rpc test  ###
-    #rpc_test "${ip}"
+    rpc_test "${ip}"
 
     ### finish ###
     check_docker_container

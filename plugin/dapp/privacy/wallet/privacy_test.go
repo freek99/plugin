@@ -120,6 +120,7 @@ func (mock *PrivacyMock) CreateUTXOs(sender string, pubkeypair string, amount in
 	dbbatch := mock.store.NewBatch(true)
 	for n := 0; n < count; n++ {
 		tx := mock.createPublic2PrivacyTx(&ty.ReqCreatePrivacyTx{
+			AssetExec:  "coins",
 			Tokenname:  mock.tokenName,
 			Type:       1,
 			Amount:     amount,
@@ -204,7 +205,7 @@ func (mock *PrivacyMock) createPublic2PrivacyTx(req *ty.ReqCreatePrivacyTx) *typ
 	value := &ty.Public2Privacy{
 		Tokenname: req.Tokenname,
 		Amount:    amount,
-		Note:      string(req.GetNote()),
+		Note:      req.GetNote(),
 		Output:    privacyOutput,
 	}
 	action := &ty.PrivacyAction{
@@ -217,9 +218,10 @@ func (mock *PrivacyMock) createPublic2PrivacyTx(req *ty.ReqCreatePrivacyTx) *typ
 		Nonce:   mock.walletOp.Nonce(),
 		To:      address.ExecAddress(ty.PrivacyX),
 	}
+	cfg := mock.walletOp.GetAPI().GetConfig()
 	txSize := types.Size(tx) + types.SignatureSize
-	realFee := int64((txSize+1023)>>types.Size1Kshiftlen) * types.GInt("MinFee")
+	realFee := int64((txSize+1023)>>types.Size1Kshiftlen) * cfg.GInt("MinFee")
 	tx.Fee = realFee
-	tx.SetExpire(time.Hour)
+	tx.SetExpire(cfg, time.Hour)
 	return tx
 }

@@ -30,7 +30,7 @@ func TestKvdbNewClose(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil)
+	store := New(storeCfg, nil, nil)
 
 	assert.NotNil(t, store)
 	store.Close()
@@ -42,7 +42,7 @@ func TestKvddbSetGet(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(t, store)
 
 	keys0 := [][]byte{[]byte("mk1"), []byte("mk2")}
@@ -89,7 +89,7 @@ func TestKvdbMemSet(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(t, store)
 
 	var kv []*types.KeyValue
@@ -121,7 +121,7 @@ func TestKvmvccdbMemSetUpgrade(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(t, store)
 	store.MemSetUpgrade(nil, false)
 }
@@ -133,7 +133,7 @@ func TestKvmvccdbCommitUpgrade(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(t, store)
 	store.CommitUpgrade(nil)
 }
@@ -144,7 +144,7 @@ func TestKvdbRollback(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(t, store)
 
 	var kv []*types.KeyValue
@@ -168,15 +168,6 @@ func TestKvdbRollback(t *testing.T) {
 	assert.Nil(t, notExistHash)
 }
 
-var checkKVResult []*types.KeyValue
-
-func checkKV(k, v []byte) bool {
-	checkKVResult = append(checkKVResult,
-		&types.KeyValue{Key: k, Value: v})
-	//mlog.Debug("checkKV", "key", string(k), "value", string(v))
-	return false
-}
-
 func GetRandomString(length int) string {
 	return common.GetRandPrintString(20, length)
 }
@@ -188,7 +179,7 @@ func BenchmarkGet(b *testing.B) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(b, store)
 
 	var kv []*types.KeyValue
@@ -197,8 +188,8 @@ func BenchmarkGet(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key := GetRandomString(MaxKeylenth)
 		value := fmt.Sprintf("%s%d", key, i)
-		keys = append(keys, []byte(string(key)))
-		kv = append(kv, &types.KeyValue{Key: []byte(string(key)), Value: []byte(string(value))})
+		keys = append(keys, []byte(key))
+		kv = append(kv, &types.KeyValue{Key: []byte(key), Value: []byte(value)})
 		if i%10000 == 0 {
 			datas := &types.StoreSet{StateHash: hash, KV: kv, Height: 0}
 			hash, err = store.Set(datas, true)
@@ -229,7 +220,7 @@ func BenchmarkSet(b *testing.B) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(b, store)
 
 	var kv []*types.KeyValue
@@ -239,8 +230,8 @@ func BenchmarkSet(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key := GetRandomString(MaxKeylenth)
 		value := fmt.Sprintf("%s%d", key, i)
-		keys = append(keys, []byte(string(key)))
-		kv = append(kv, &types.KeyValue{Key: []byte(string(key)), Value: []byte(string(value))})
+		keys = append(keys, []byte(key))
+		kv = append(kv, &types.KeyValue{Key: []byte(key), Value: []byte(value)})
 		if i%10000 == 0 {
 			datas := &types.StoreSet{StateHash: hash, KV: kv, Height: 0}
 			hash, err = store.Set(datas, true)
@@ -263,7 +254,7 @@ func BenchmarkMemSet(b *testing.B) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(b, store)
 
 	var kv []*types.KeyValue
@@ -274,8 +265,8 @@ func BenchmarkMemSet(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key = GetRandomString(MaxKeylenth)
 		value = fmt.Sprintf("v%d", i)
-		keys = append(keys, []byte(string(key)))
-		kv = append(kv, &types.KeyValue{Key: []byte(string(key)), Value: []byte(string(value))})
+		keys = append(keys, []byte(key))
+		kv = append(kv, &types.KeyValue{Key: []byte(key), Value: []byte(value)})
 	}
 	datas := &types.StoreSet{
 		StateHash: drivers.EmptyRoot[:],
@@ -296,7 +287,7 @@ func BenchmarkCommit(b *testing.B) {
 	defer os.RemoveAll(dir) // clean up
 	os.RemoveAll(dir)       //删除已存在目录
 	var storeCfg = newStoreCfg(dir)
-	store := New(storeCfg, nil).(*Store)
+	store := New(storeCfg, nil, nil).(*Store)
 	assert.NotNil(b, store)
 
 	var kv []*types.KeyValue
@@ -307,8 +298,8 @@ func BenchmarkCommit(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key = GetRandomString(MaxKeylenth)
 		value = fmt.Sprintf("v%d", i)
-		keys = append(keys, []byte(string(key)))
-		kv = append(kv, &types.KeyValue{Key: []byte(string(key)), Value: []byte(string(value))})
+		keys = append(keys, []byte(key))
+		kv = append(kv, &types.KeyValue{Key: []byte(key), Value: []byte(value)})
 	}
 	datas := &types.StoreSet{
 		StateHash: drivers.EmptyRoot[:],

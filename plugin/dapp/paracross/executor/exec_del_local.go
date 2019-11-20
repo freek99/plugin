@@ -13,6 +13,7 @@ import (
 //ExecDelLocal_Commit consensus commit tx del local db process
 func (e *Paracross) ExecDelLocal_Commit(payload *pt.ParacrossCommitAction, tx *types.Transaction, receiptData *types.ReceiptData, index int) (*types.LocalDBSet, error) {
 	var set types.LocalDBSet
+	cfg := e.GetAPI().GetConfig()
 	for _, log := range receiptData.Logs {
 		if log.Ty == pt.TyLogParacrossCommit { //} || log.Ty == types.TyLogParacrossCommitRecord {
 			var g pt.ReceiptParacrossCommit
@@ -32,7 +33,7 @@ func (e *Paracross) ExecDelLocal_Commit(payload *pt.ParacrossCommitAction, tx *t
 			key = calcLocalHeightKey(g.Title, g.Height)
 			set.KV = append(set.KV, &types.KeyValue{Key: key, Value: nil})
 
-			if !types.IsPara() {
+			if !cfg.IsPara() && g.Height > 0 {
 				r, err := e.saveLocalParaTxs(tx, true)
 				if err != nil {
 					return nil, err
@@ -55,6 +56,7 @@ func (e *Paracross) ExecDelLocal_Commit(payload *pt.ParacrossCommitAction, tx *t
 // ExecDelLocal_NodeConfig node config tx delete process
 func (e *Paracross) ExecDelLocal_NodeConfig(payload *pt.ParaNodeAddrConfig, tx *types.Transaction, receiptData *types.ReceiptData, index int) (*types.LocalDBSet, error) {
 	var set types.LocalDBSet
+	cfg := e.GetAPI().GetConfig()
 	for _, log := range receiptData.Logs {
 		if log.Ty == pt.TyLogParaNodeConfig {
 			var g pt.ReceiptParaNodeConfig
@@ -77,6 +79,25 @@ func (e *Paracross) ExecDelLocal_NodeConfig(payload *pt.ParaNodeAddrConfig, tx *
 			}
 			key := calcLocalNodeTitleDone(g.Title, g.TargetAddr)
 			set.KV = append(set.KV, &types.KeyValue{Key: key, Value: nil})
+		} else if log.Ty == pt.TyLogParacrossCommitDone {
+			var g pt.ReceiptParacrossDone
+			types.Decode(log.Log, &g)
+			g.Height = g.Height - 1
+
+			key := calcLocalTitleKey(g.Title)
+			set.KV = append(set.KV, &types.KeyValue{Key: key, Value: types.Encode(&g)})
+
+			key = calcLocalHeightKey(g.Title, g.Height)
+			set.KV = append(set.KV, &types.KeyValue{Key: key, Value: nil})
+
+			if !cfg.IsPara() && g.Height > 0 {
+				r, err := e.saveLocalParaTxsFork(&g, true)
+				if err != nil {
+					return nil, err
+				}
+				set.KV = append(set.KV, r.KV...)
+			}
+
 		}
 	}
 	return &set, nil
@@ -163,4 +184,9 @@ func (e *Paracross) ExecDelLocal_Withdraw(payload *types.AssetsWithdraw, tx *typ
 //ExecDelLocal_TransferToExec asset transfer to exec del local db process
 func (e *Paracross) ExecDelLocal_TransferToExec(payload *types.AssetsTransferToExec, tx *types.Transaction, receiptData *types.ReceiptData, index int) (*types.LocalDBSet, error) {
 	return nil, nil
+}
+
+//ExecLocal_SelfConsensStageConfig transfer asset to exec local db process
+func (e *Paracross) ExecDelLocal_SelfStageConfig(payload *pt.ParaStageConfig, tx *types.Transaction, receiptData *types.ReceiptData, index int) (*types.LocalDBSet, error) {
+	return e.execAutoDelLocal(tx, receiptData)
 }

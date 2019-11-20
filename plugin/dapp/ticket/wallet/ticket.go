@@ -299,18 +299,22 @@ func (policy *ticketPolicy) checkNeedFlushTicket(tx *types.Transaction, receipt 
 }
 
 func (policy *ticketPolicy) forceCloseTicket(height int64, minerAddr string) (*types.ReplyHashes, error) {
-	return policy.forceCloseAllTicket(height, minerAddr)
+	if minerAddr != "" {
+		return policy.forceCloseTicketByReturnAddr(height, minerAddr)
+	}
+
+	return policy.forceCloseAllTicket(height)
 }
 
-func (policy *ticketPolicy) forceCloseAllTicket(height int64, minerAddr string) (*types.ReplyHashes, error) {
-	var tlistMiner []*ty.Ticket
-	var err error
-	// get miner addr's tickets if any
-	if minerAddr != "" {
-		tlistMiner, err = policy.getForceCloseTickets(minerAddr)
-		if err != nil {
-			return nil, err
-		}
+//通过minerAddr地址找到绑定的ticket的returnAddr，通过returnAddr的私钥close ticket，防止miner的私钥丢失场景
+func (policy *ticketPolicy) forceCloseTicketByReturnAddr(height int64, minerAddr string) (*types.ReplyHashes, error) {
+	tListMiner, err := policy.getForceCloseTickets(minerAddr)
+	if err != nil {
+		return nil, err
+	}
+	tListMap := make(map[string][]*ty.Ticket)
+	for _, ticket := range tListMiner {
+		tListMap[ticket.ReturnAddress] = append(tListMap[ticket.ReturnAddress], ticket)
 	}
 
 	keys, err := policy.getWalletOperate().GetAllPrivKeys()
@@ -320,9 +324,42 @@ func (policy *ticketPolicy) forceCloseAllTicket(height int64, minerAddr string) 
 
 	var hashes types.ReplyHashes
 	for _, key := range keys {
-		hash, err := policy.forceCloseTicketsByAddr(height, key, tlistMiner)
+		returnAddr := address.PubKeyToAddress(key.PubKey().Bytes()).String()
+		if len(tListMap[returnAddr]) == 0 {
+			continue
+		}
+		hash, err := policy.forceCloseTicketList(height, key, tListMap[returnAddr])
 		if err != nil {
-			bizlog.Error("forceCloseAllTicket", "forceCloseTicketsByAddr error", err)
+			bizlog.Error("forceCloseTicketByAddr", "error", err, "returnAddr", returnAddr, "minerAddr", minerAddr)
+			continue
+		}
+		if hash == nil {
+			continue
+		}
+		hashes.Hashes = append(hashes.Hashes, hash)
+	}
+	return &hashes, nil
+}
+
+func (policy *ticketPolicy) forceCloseAllTicket(height int64) (*types.ReplyHashes, error) {
+	var err error
+
+	keys, err := policy.getWalletOperate().GetAllPrivKeys()
+	if err != nil {
+		return nil, err
+	}
+
+	var hashes types.ReplyHashes
+	for _, key := range keys {
+		addr := address.PubKeyToAddress(key.PubKey().Bytes()).String()
+		tlist, err := policy.getForceCloseTickets(addr)
+		if err != nil {
+			bizlog.Error("forceCloseAllTicket getTickets", "error", err, "addr", addr)
+			continue
+		}
+		hash, err := policy.forceCloseTicketList(height, key, tlist)
+		if err != nil {
+			bizlog.Error("forceCloseAllTicket", "error", err, "addr", addr)
 			continue
 		}
 		if hash == nil {
@@ -361,31 +398,21 @@ func (policy *ticketPolicy) getForceCloseTickets(addr string) ([]*ty.Ticket, err
 	return append(tlist1, tlist2...), nil
 }
 
-func (policy *ticketPolicy) forceCloseTicketsByAddr(height int64, priv crypto.PrivKey, tListMiner []*ty.Ticket) ([]byte, error) {
-	addr := address.PubKeyToAddress(priv.PubKey().Bytes()).String()
-	tlist, err := policy.getForceCloseTickets(addr)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, ticket := range tListMiner {
-		if ticket.ReturnAddress == addr {
-			tlist = append(tlist, ticket)
-		}
-	}
-
+func (policy *ticketPolicy) forceCloseTicketList(height int64, priv crypto.PrivKey, tlist []*ty.Ticket) ([]byte, error) {
 	var ids []string
 	var tl []*ty.Ticket
 	now := types.Now().Unix()
+	chain33Cfg := policy.walletOperate.GetAPI().GetConfig()
+	cfg := ty.GetTicketMinerParam(chain33Cfg, height)
 	for _, t := range tlist {
 		if !t.IsGenesis {
-			if t.Status == 1 && now-t.GetCreateTime() < types.GetP(height).TicketWithdrawTime {
+			if t.Status == 1 && now-t.GetCreateTime() < cfg.TicketWithdrawTime {
 				continue
 			}
-			if t.Status == 2 && now-t.GetCreateTime() < types.GetP(height).TicketWithdrawTime {
+			if t.Status == 2 && now-t.GetCreateTime() < cfg.TicketWithdrawTime {
 				continue
 			}
-			if t.Status == 2 && now-t.GetMinerTime() < types.GetP(height).TicketMinerWaitTime {
+			if t.Status == 2 && now-t.GetMinerTime() < cfg.TicketMinerWaitTime {
 				continue
 			}
 		}
@@ -470,12 +497,14 @@ func (policy *ticketPolicy) closeTicketsByAddr(height int64, priv crypto.PrivKey
 	var ids []string
 	var tl []*ty.Ticket
 	now := types.Now().Unix()
+	chain33Cfg := policy.walletOperate.GetAPI().GetConfig()
+	cfg := ty.GetTicketMinerParam(chain33Cfg, height)
 	for _, t := range tlist {
 		if !t.IsGenesis {
-			if now-t.GetCreateTime() < types.GetP(height).TicketWithdrawTime {
+			if now-t.GetCreateTime() < cfg.TicketWithdrawTime {
 				continue
 			}
-			if now-t.GetMinerTime() < types.GetP(height).TicketMinerWaitTime {
+			if now-t.GetMinerTime() < cfg.TicketMinerWaitTime {
 				continue
 			}
 		}
@@ -608,10 +637,12 @@ func (policy *ticketPolicy) buyTicketOne(height int64, priv crypto.PrivKey) ([]b
 	}
 	//留一个币作为手续费，如果手续费不够了，不能挖矿
 	//判断手续费是否足够，如果不足要及时补充。
+	chain33Cfg := policy.walletOperate.GetAPI().GetConfig()
+	cfg := ty.GetTicketMinerParam(chain33Cfg, height)
 	fee := types.Coin
-	if acc1.Balance+acc2.Balance-2*fee >= types.GetP(height).TicketPrice {
+	if acc1.Balance+acc2.Balance-2*fee >= cfg.TicketPrice {
 		// 如果可用余额+冻结余额，可以凑成新票，则转币到冻结余额
-		if (acc1.Balance+acc2.Balance-2*fee)/types.GetP(height).TicketPrice > acc2.Balance/types.GetP(height).TicketPrice {
+		if (acc1.Balance+acc2.Balance-2*fee)/cfg.TicketPrice > acc2.Balance/cfg.TicketPrice {
 			//第一步。转移币到 ticket
 			toaddr := address.ExecAddress(ty.TicketX)
 			amount := acc1.Balance - 2*fee
@@ -632,7 +663,7 @@ func (policy *ticketPolicy) buyTicketOne(height int64, priv crypto.PrivKey) ([]b
 		if err != nil {
 			return nil, 0, err
 		}
-		count := acc.Balance / types.GetP(height).TicketPrice
+		count := acc.Balance / cfg.TicketPrice
 		if count > 0 {
 			txhash, err := policy.openticket(addr, addr, priv, int32(count))
 			return txhash, int(count), err
@@ -712,6 +743,8 @@ func (policy *ticketPolicy) buyMinerAddrTicketOne(height int64, priv crypto.Priv
 	}
 	total := 0
 	var hashes [][]byte
+	chain33Cfg := policy.walletOperate.GetAPI().GetConfig()
+	cfg := ty.GetTicketMinerParam(chain33Cfg, height)
 	for i := 0; i < len(addrs); i++ {
 		bizlog.Info("sourceaddr", "addr", addrs[i])
 		ok := checkMinerWhiteList(addrs[i])
@@ -723,7 +756,7 @@ func (policy *ticketPolicy) buyMinerAddrTicketOne(height int64, priv crypto.Priv
 		if err != nil {
 			return nil, 0, err
 		}
-		count := acc.Balance / types.GetP(height).TicketPrice
+		count := acc.Balance / cfg.TicketPrice
 		if count > 0 {
 			txhash, err := policy.openticket(addr, addrs[i], priv, int32(count))
 			if err != nil {
@@ -801,7 +834,8 @@ func (policy *ticketPolicy) autoMining() {
 	defer operater.GetWaitGroup().Done()
 
 	// 只有ticket共识下ticket相关的操作才有效
-	q := types.Conf("config.consensus")
+	cfg := policy.walletOperate.GetAPI().GetConfig()
+	q := types.Conf(cfg, "config.consensus")
 	if q != nil {
 		cons := q.GStr("name")
 		if strings.Compare(strings.TrimSpace(cons), ty.TicketX) != 0 {

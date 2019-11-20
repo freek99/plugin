@@ -2,6 +2,7 @@ Title="local"
 TestNet=true
 FixTime=false
 
+
 [log]
 # 日志级别，支持debug(dbug)/info/warn/error(eror)/crit
 loglevel = "debug"
@@ -70,29 +71,38 @@ name="ticket"
 minerstart=true
 genesisBlockTime=1514533394
 genesis="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
+minerExecs=["ticket", "autonomy"]
 
 [mver.consensus]
 fundKeyAddr = "1BQXS6TxaYYG5mADaWij4AxhZZUTpw95a5"
+powLimitBits = "0x1f00ffff"
+maxTxNumber = 1600
+
+
+[mver.consensus.ForkChainParamV1]
+maxTxNumber = 10000
+
+[mver.consensus.ForkChainParamV2]
+powLimitBits = "0x2f2fffff"
+
+[mver.consensus.ForkTicketFundAddrV1]
+fundKeyAddr = "1Ji3W12KGScCM7C2p8bg635sNkayDM8MGY"
+
+[mver.consensus.ticket]
 coinReward = 18
 coinDevFund = 12
 ticketPrice = 10000
-powLimitBits = "0x1f00ffff"
 retargetAdjustmentFactor = 4
 futureBlockTime = 16
 ticketFrozenTime = 5
 ticketWithdrawTime = 10
 ticketMinerWaitTime = 2
-maxTxNumber = 1600
 targetTimespan = 2304
 targetTimePerBlock = 16
 
-[mver.consensus.ForkChainParamV1]
-maxTxNumber = 10000
+[mver.consensus.ticket.ForkChainParamV1]
 targetTimespan = 288 #only for test
 targetTimePerBlock = 2
-
-[mver.consensus.ForkChainParamV2]
-powLimitBits = "0x1f2fffff"
 
 [consensus.sub.solo]
 genesis="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
@@ -104,7 +114,7 @@ genesisBlockTime=1514533394
 [[consensus.sub.ticket.genesis]]
 minerAddr="12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
 returnAddr="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
-count=10000
+count=3000
 
 [[consensus.sub.ticket.genesis]]
 minerAddr="1PUiGcbsccfxW3zuvHXZBJfznziph5miAo"
@@ -173,3 +183,7 @@ superManager=[
     "12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv", 
     "1Q8hGLfoGe63efeWa8fJ4Pnukhkngt6poK"
 ]
+
+[exec.sub.autonomy]
+total="16htvcBNSEA7fZhAdLJphDwQRQJaHpyHTp"
+useBalance=false

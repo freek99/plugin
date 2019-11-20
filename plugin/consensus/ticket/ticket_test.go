@@ -8,6 +8,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/33cn/chain33/account"
 	"github.com/33cn/chain33/common/crypto"
@@ -20,9 +21,12 @@ import (
 	secp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/assert"
 
+	apimocks "github.com/33cn/chain33/client/mocks"
 	_ "github.com/33cn/chain33/system"
+	drivers "github.com/33cn/chain33/system/consensus"
 	_ "github.com/33cn/plugin/plugin/dapp/init"
 	_ "github.com/33cn/plugin/plugin/store/init"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestTicket(t *testing.T) {
@@ -32,11 +36,12 @@ func TestTicket(t *testing.T) {
 func testTicket(t *testing.T) {
 	mock33 := testnode.New("testdata/chain33.cfg.toml", nil)
 	defer mock33.Close()
+	cfg := mock33.GetClient().GetConfig()
 	mock33.Listen()
 	reply, err := mock33.GetAPI().ExecWalletFunc("ticket", "WalletAutoMiner", &ty.MinerFlag{Flag: 1})
 	assert.Nil(t, err)
 	assert.Equal(t, true, reply.(*types.Reply).IsOk)
-	acc := account.NewCoinsAccount()
+	acc := account.NewCoinsAccount(cfg)
 	addr := mock33.GetGenesisAddress()
 	accounts, err := acc.GetBalance(mock33.GetAPI(), &types.ReqBalance{Execer: "ticket", Addresses: []string{addr}})
 	assert.Nil(t, err)
@@ -46,11 +51,11 @@ func testTicket(t *testing.T) {
 	assert.Nil(t, err)
 	//assert.Equal(t, accounts[0].Balance, int64(1000000000000))
 	//send to address
-	tx := util.CreateCoinsTx(mock33.GetHotKey(), mock33.GetGenesisAddress(), types.Coin/100)
+	tx := util.CreateCoinsTx(cfg, mock33.GetHotKey(), mock33.GetGenesisAddress(), types.Coin/100)
 	mock33.SendTx(tx)
 	mock33.Wait()
 	//bind miner
-	tx = createBindMiner(t, hotaddr, addr, mock33.GetGenesisKey())
+	tx = createBindMiner(cfg, t, hotaddr, addr, mock33.GetGenesisKey())
 	hash := mock33.SendTx(tx)
 	detail, err := mock33.WaitTx(hash)
 	assert.Nil(t, err)
@@ -68,20 +73,28 @@ func testTicket(t *testing.T) {
 	status, err = mock33.GetAPI().GetWalletStatus()
 	assert.Nil(t, err)
 	assert.Equal(t, true, status.IsAutoMining)
-	err = mock33.WaitHeight(50)
-	assert.Nil(t, err)
-	//查询票是否自动close，并且购买了新的票
-	req := &types.ReqWalletTransactionList{Count: 1000}
-	list, err := mock33.GetAPI().WalletTransactionList(req)
-	assert.Nil(t, err)
+	start := time.Now()
+	height := int64(0)
 	hastclose := false
 	hastopen := false
-	for _, tx := range list.TxDetails {
-		if tx.ActionName == "tclose" && tx.Receipt.Ty == 2 {
-			hastclose = true
+	for {
+		height += 20
+		err = mock33.WaitHeight(height)
+		assert.Nil(t, err)
+		//查询票是否自动close，并且购买了新的票
+		req := &types.ReqWalletTransactionList{Count: 1000}
+		list, err := mock33.GetAPI().WalletTransactionList(req)
+		assert.Nil(t, err)
+		for _, tx := range list.TxDetails {
+			if tx.ActionName == "tclose" && tx.Receipt.Ty == 2 {
+				hastclose = true
+			}
+			if tx.ActionName == "topen" && tx.Receipt.Ty == 2 {
+				hastopen = true
+			}
 		}
-		if tx.ActionName == "topen" && tx.Receipt.Ty == 2 {
-			hastopen = true
+		if hastopen == true && hastclose == true || time.Since(start) > 100*time.Second {
+			break
 		}
 	}
 	assert.Equal(t, true, hastclose)
@@ -92,11 +105,11 @@ func testTicket(t *testing.T) {
 	fmt.Println(accounts[0])
 }
 
-func createBindMiner(t *testing.T, m, r string, priv crypto.PrivKey) *types.Transaction {
+func createBindMiner(cfg *types.Chain33Config, t *testing.T, m, r string, priv crypto.PrivKey) *types.Transaction {
 	ety := types.LoadExecutorType("ticket")
 	tx, err := ety.Create("Tbind", &ty.TicketBind{MinerAddress: m, ReturnAddress: r})
 	assert.Nil(t, err)
-	tx, err = types.FormatTx("ticket", tx)
+	tx, err = types.FormatTx(cfg, "ticket", tx)
 	assert.Nil(t, err)
 	tx.Sign(types.SECP256K1, priv)
 	return tx
@@ -159,12 +172,17 @@ func Test_genPrivHash(t *testing.T) {
 }
 
 func Test_getNextRequiredDifficulty(t *testing.T) {
-	c := &Client{}
+	cfg := types.NewChain33Config(types.ReadFile("testdata/chain33.cfg.toml"))
+
+	api := new(apimocks.QueueProtocolAPI)
+	api.On("GetConfig", mock.Anything).Return(cfg, nil)
+	c := &Client{BaseClient: &drivers.BaseClient{}}
+	c.SetAPI(api)
 
 	bits, bt, err := c.getNextRequiredDifficulty(nil, 1)
 	assert.NoError(t, err)
 	assert.Equal(t, bt, defaultModify)
-	assert.Equal(t, bits, types.GetP(0).PowLimitBits)
+	assert.Equal(t, bits, cfg.GetP(0).PowLimitBits)
 }
 
 func Test_vrfVerify(t *testing.T) {

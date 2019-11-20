@@ -14,8 +14,6 @@ echo_rst() {
         echo -e "${GRE}$1 ok${NOC}"
     elif [ "$2" -eq 2 ]; then
         echo -e "${GRE}$1 not support${NOC}"
-        CASE_ERR="err"
-        echo $CASE_ERR
     else
         echo -e "${RED}$1 fail${NOC}"
         CASE_ERR="err"
@@ -37,9 +35,9 @@ chain33_BlockWait() {
             break
         fi
         count=$((count + 1))
-        sleep 1
+        sleep 0.1
     done
-    echo "wait new block $count s, cur height=$expect,old=$cur_height"
+    echo "wait new block $count/10 s, cur height=$expect,old=$cur_height"
 }
 
 chain33_QueryTx() {
@@ -96,6 +94,7 @@ chain33_SendToAddress() {
     [ "$ok" == true ]
 
     hash=$(jq -r ".result.hash" <<<"$resp")
+    echo "hash"
     chain33_QueryTx "$hash" "$MAIN_HTTP"
 }
 
@@ -107,7 +106,8 @@ chain33_ImportPrivkey() {
 
     local req='"method":"Chain33.ImportPrivkey", "params":[{"privkey":"'"$pri"'", "label":"'"$label"'"}]'
     resp=$(curl -ksd "{$req}" "$MAIN_HTTP")
-    ok=$(jq '(((.error|not) and (.result.label=="'"$label"'") and (.result.acc.addr == "'"$acc"'")) or (.error=="ErrPrivkeyExist"))' <<<"$resp")
+    #ok=$(jq '(((.error|not) and (.result.label=="'"$label"'") and (.result.acc.addr == "'"$acc"'")) or (.error=="ErrPrivkeyExist"))' <<<"$resp")
+    ok=$(jq '(((.error|not) and (.result.label=="'"$label"'") and (.result.acc.addr == "'"$acc"'")) or (.error=="ErrPrivkeyExist") or (.error=="ErrLabelHasUsed"))' <<<"$resp")
 
     [ "$ok" == true ]
 }
@@ -163,4 +163,42 @@ chain33_LastBlockhash() {
     result=$(curl -ksd '{"method":"Chain33.GetLastHeader","params":[{}]}' -H 'content-type:text/plain;' "${MAIN_HTTP}" | jq -r ".result.hash")
     LAST_BLOCK_HASH=$result
     echo -e "######\\n  last blockhash is $LAST_BLOCK_HASH  \\n######"
+}
+
+chain33_applyCoins() {
+    echo "chain33_getMainChainCoins"
+    if [ "$#" -lt 3 ]; then
+        echo "chain33_getMainCoins wrong params"
+        exit 1
+    fi
+    local targetAddr=$1
+    local count=$2
+    local ip=$3
+    if [ "$count" -gt 15000000000 ]; then
+        echo "chain33_getMainCoins wrong coins count,should less than 150 00000000"
+        exit 1
+    fi
+
+    local poolAddr="1PcGKYYoLn1PLLJJodc1UpgWGeFAQasAkx"
+    chain33_SendToAddress "${poolAddr}" "${targetAddr}" "$count" "${ip}"
+
+}
+
+chain33_RpcTestBegin() {
+    echo -e "${GRE}====== $1 Rpc Test Begin ===========${NOC}"
+}
+
+chain33_RpcTestRst() {
+    if [ -n "$2" ]; then
+        echo -e "${RED}====== $1 Rpc Test Fail ===========${NOC}"
+        exit 1
+    else
+        echo -e "${GRE}====== $1 Rpc Test Pass ===========${NOC}"
+    fi
+}
+
+chain33_debug_function() {
+    set -x
+    eval "$@"
+    set +x
 }

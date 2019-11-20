@@ -13,10 +13,11 @@ import (
 	"testing"
 	"time"
 
+	"strings"
+
 	"github.com/33cn/chain33/common"
 	"github.com/33cn/chain33/common/address"
 	"github.com/33cn/chain33/common/crypto"
-	cty "github.com/33cn/chain33/system/dapp/coins/types"
 	"github.com/33cn/chain33/types"
 	pty "github.com/33cn/plugin/plugin/dapp/token/types"
 	"github.com/stretchr/testify/assert"
@@ -385,28 +386,6 @@ func TestQueryTokenLogs(t *testing.T) {
 	}
 }
 
-//***************************************************
-//**************common actions for Test**************
-//***************************************************
-func sendtoaddress(c types.Chain33Client, priv crypto.PrivKey, to string, amount int64) ([]byte, error) {
-	v := &cty.CoinsAction_Transfer{Transfer: &types.AssetsTransfer{Amount: amount}}
-	transfer := &cty.CoinsAction{Value: v, Ty: cty.CoinsActionTransfer}
-	tx := &types.Transaction{Execer: []byte("coins"), Payload: types.Encode(transfer), Fee: fee, To: to}
-	tx.Nonce = r.Int63()
-	tx.Sign(types.SECP256K1, priv)
-	// Contact the server and print out its response.
-	reply, err := c.SendTransaction(context.Background(), tx)
-	if err != nil {
-		fmt.Println("err", err)
-		return nil, err
-	}
-	if !reply.IsOk {
-		fmt.Println("err = ", reply.GetMsg())
-		return nil, errors.New(string(reply.GetMsg()))
-	}
-	return tx.Hash(), nil
-}
-
 func waitTx(hash []byte) bool {
 	i := 0
 	for {
@@ -428,19 +407,6 @@ func waitTx(hash []byte) bool {
 	}
 }
 
-func genaddress() (string, crypto.PrivKey) {
-	cr, err := crypto.New(types.GetSignName("", types.SECP256K1))
-	if err != nil {
-		panic(err)
-	}
-	privto, err := cr.GenKey()
-	if err != nil {
-		panic(err)
-	}
-	addrto := address.PubKeyToAddress(privto.PubKey().Bytes())
-	return addrto.String(), privto
-}
-
 func getprivkey(key string) crypto.PrivKey {
 	cr, err := crypto.New(types.GetSignName("", types.SECP256K1))
 	if err != nil {
@@ -458,9 +424,9 @@ func getprivkey(key string) crypto.PrivKey {
 }
 
 func TestToken_validSymbolWithHeight(t *testing.T) {
-	types.SetTitleOnlyForTest("chain33")
-	forkBadTokenSymbol := types.GetDappFork(pty.TokenX, pty.ForkBadTokenSymbolX)
-	forkTokenSymbolWithNumber := types.GetDappFork(pty.TokenX, pty.ForkTokenSymbolWithNumberX)
+	cfg := types.NewChain33Config(strings.Replace(types.GetDefaultCfgstring(), "Title=\"local\"", "Title=\"chain33\"", 1))
+	forkBadTokenSymbol := cfg.GetDappFork(pty.TokenX, pty.ForkBadTokenSymbolX)
+	forkTokenSymbolWithNumber := cfg.GetDappFork(pty.TokenX, pty.ForkTokenSymbolWithNumberX)
 	t.Log("x", "1", forkBadTokenSymbol, "2", forkTokenSymbolWithNumber)
 	assert.Equal(t, true, (forkTokenSymbolWithNumber >= forkBadTokenSymbol))
 
@@ -469,25 +435,25 @@ func TestToken_validSymbolWithHeight(t *testing.T) {
 		height int64
 		expect bool
 	}{
-		{[]byte("x"), int64(forkBadTokenSymbol - 1), false},
-		{[]byte("X林"), int64(forkBadTokenSymbol - 1), true},
+		{[]byte("x"), forkBadTokenSymbol - 1, false},
+		{[]byte("X林"), forkBadTokenSymbol - 1, true},
 
-		{[]byte("x"), int64(forkBadTokenSymbol), false},
-		{[]byte("X林"), int64(forkBadTokenSymbol), false},
+		{[]byte("x"), forkBadTokenSymbol, false},
+		{[]byte("X林"), forkBadTokenSymbol, false},
 
-		{[]byte("x"), int64(forkTokenSymbolWithNumber - 1), false},
-		{[]byte("X林"), int64(forkTokenSymbolWithNumber - 1), false},
-		{[]byte("X1"), int64(forkTokenSymbolWithNumber - 1), false},
+		{[]byte("x"), forkTokenSymbolWithNumber - 1, false},
+		{[]byte("X林"), forkTokenSymbolWithNumber - 1, false},
+		{[]byte("X1"), forkTokenSymbolWithNumber - 1, false},
 
-		{[]byte("x"), int64(forkTokenSymbolWithNumber), false},
-		{[]byte("X林"), int64(forkTokenSymbolWithNumber), false},
-		{[]byte("X1"), int64(forkTokenSymbolWithNumber), true},
+		{[]byte("x"), forkTokenSymbolWithNumber, false},
+		{[]byte("X林"), forkTokenSymbolWithNumber, false},
+		{[]byte("X1"), forkTokenSymbolWithNumber, true},
 	}
 
 	for _, c := range cases {
 		c := c
 		t.Run("validSymbol", func(t *testing.T) {
-			assert.Equal(t, c.expect, validSymbolWithHeight(c.symbol, c.height))
+			assert.Equal(t, c.expect, validSymbolWithHeight(cfg, c.symbol, c.height))
 		})
 	}
 }

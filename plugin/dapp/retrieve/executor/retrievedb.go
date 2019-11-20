@@ -13,6 +13,7 @@ import (
 	"github.com/33cn/chain33/types"
 
 	//log "github.com/33cn/chain33/common/log/log15"
+	"github.com/33cn/chain33/client"
 	"github.com/33cn/chain33/system/dapp"
 	rt "github.com/33cn/plugin/plugin/dapp/retrieve/types"
 )
@@ -99,6 +100,7 @@ type Action struct {
 	blocktime    int64
 	height       int64
 	execaddr     string
+	api          client.QueueProtocolAPI
 }
 
 // NewRetrieveAcction gen instance
@@ -106,7 +108,7 @@ func NewRetrieveAcction(r *Retrieve, tx *types.Transaction) *Action {
 	hash := tx.Hash()
 	fromaddr := tx.From()
 	return &Action{r.GetCoinsAccount(), r.GetStateDB(), hash, fromaddr,
-		r.GetBlockTime(), r.GetHeight(), dapp.ExecAddress(string(tx.Execer))}
+		r.GetBlockTime(), r.GetHeight(), dapp.ExecAddress(string(tx.Execer)), r.GetAPI()}
 }
 
 // RetrieveBackup Action
@@ -116,7 +118,8 @@ func (action *Action) RetrieveBackup(backupRet *rt.BackupRetrieve) (*types.Recei
 	var receipt *types.Receipt
 	var r *DB
 	var newRetrieve = false
-	if types.IsDappFork(action.height, rt.RetrieveX, "ForkRetrive") {
+	cfg := action.api.GetConfig()
+	if cfg.IsDappFork(action.height, rt.RetrieveX, rt.ForkRetriveX) {
 		if err := address.CheckAddress(backupRet.BackupAddress); err != nil {
 			rlog.Debug("retrieve checkaddress")
 			return nil, err
@@ -203,6 +206,43 @@ func (action *Action) RetrievePrepare(preRet *rt.PrepareRetrieve) (*types.Receip
 	return receipt, nil
 }
 
+// RetrievePerformAssets Action
+func (action *Action) RetrievePerformAssets(perfRet *rt.PerformRetrieve, defaultAddress string) (*types.Receipt, error) {
+	var logs []*types.ReceiptLog
+	var kv []*types.KeyValue
+	var receipt *types.Receipt
+	cfg := action.api.GetConfig()
+	// 兼容原来的找回， 在不指定的情况下，找回主币
+	if len(perfRet.Assets) == 0 {
+		perfRet.Assets = append(perfRet.Assets, &rt.AssetSymbol{Exec: "coins", Symbol: cfg.GetCoinSymbol()})
+		//return nil, nil
+	}
+
+	for _, asset := range perfRet.Assets {
+		accdb, err := account.NewAccountDB(cfg, asset.Exec, asset.Symbol, action.db)
+		if err != nil {
+			rlog.Error("RetrievePerform", "NewAccountDB", err)
+			return nil, err
+		}
+		acc := accdb.LoadExecAccount(defaultAddress, action.execaddr)
+		rlog.Debug("RetrievePerform", "acc.Balance", acc.Balance)
+		if acc.Balance > 0 {
+			receipt, err = accdb.ExecTransfer(defaultAddress, perfRet.BackupAddress, action.execaddr, acc.Balance)
+			if err != nil {
+				rlog.Debug("RetrievePerform", "ExecTransfer", err)
+				return nil, err
+			}
+			logs = append(logs, receipt.Logs...)
+			kv = append(kv, receipt.KV...)
+		} else {
+			return nil, rt.ErrRetrieveNoBalance
+		}
+	}
+
+	receipt = &types.Receipt{Ty: types.ExecOk, KV: kv, Logs: logs}
+	return receipt, nil
+}
+
 // RetrievePerform Action
 func (action *Action) RetrievePerform(perfRet *rt.PerformRetrieve) (*types.Receipt, error) {
 	var logs []*types.ReceiptLog
@@ -211,6 +251,7 @@ func (action *Action) RetrievePerform(perfRet *rt.PerformRetrieve) (*types.Recei
 	var index int
 	var related bool
 	var acc *types.Account
+	cfg := action.api.GetConfig()
 
 	retrieve, err := readRetrieve(action.db, perfRet.BackupAddress)
 	if err != nil {
@@ -237,6 +278,10 @@ func (action *Action) RetrievePerform(perfRet *rt.PerformRetrieve) (*types.Recei
 	if action.blocktime-r.RetPara[index].PrepareTime < r.RetPara[index].DelayPeriod {
 		rlog.Debug("RetrievePerform", "ErrRetrievePeriodLimit")
 		return nil, rt.ErrRetrievePeriodLimit
+	}
+
+	if cfg.IsDappFork(action.height, rt.RetrieveX, rt.ForkRetriveAssetX) {
+		return action.RetrievePerformAssets(perfRet, r.RetPara[index].DefaultAddress)
 	}
 
 	acc = action.coinsAccount.LoadExecAccount(r.RetPara[index].DefaultAddress, action.execaddr)

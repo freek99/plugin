@@ -1,7 +1,8 @@
 Title="chain33"
 TestNet=true
 FixTime=false
-version="6.2.0"
+version="6.3.0"
+
 
 [log]
 # 日志级别，支持debug(dbug)/info/warn/error(eror)/crit
@@ -63,12 +64,12 @@ grpcFuncWhitelist=["*"]
 
 
 [mempool]
-name="timeline"
+name="price"
 poolCacheSize=10240
 minTxFee=100000
 maxTxNumPerAccount=100
 maxTxFee=1000000000
-
+isLevelFee=true
 [mempool.sub.timeline]
 poolCacheSize=10240
 
@@ -86,37 +87,47 @@ name="ticket"
 minerstart=true
 genesisBlockTime=1514533394
 genesis="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
+minerExecs=["ticket", "autonomy"]
 
 [mver.consensus]
 fundKeyAddr = "1BQXS6TxaYYG5mADaWij4AxhZZUTpw95a5"
+powLimitBits="0x1f00ffff"
+maxTxNumber = 1600      #160
+
+[mver.consensus.ForkChainParamV1]
+maxTxNumber = 1500
+
+[mver.consensus.ForkTicketFundAddrV1]
+fundKeyAddr = "1Ji3W12KGScCM7C2p8bg635sNkayDM8MGY"
+
+[mver.consensus.ticket]
 coinReward = 18
 coinDevFund = 12
 ticketPrice = 10000
-powLimitBits="0x1f00ffff"
 retargetAdjustmentFactor = 4
 futureBlockTime = 16
 ticketFrozenTime = 5    #5s only for test
 ticketWithdrawTime = 10 #10s only for test
 ticketMinerWaitTime = 2 #2s only for test
-maxTxNumber = 1600      #160
-targetTimespan = 2304
+targetTimespan=2304
 targetTimePerBlock=16
 
-[mver.consensus.ForkChainParamV1]
+[mver.consensus.ticket.ForkChainParamV1]
 futureBlockTime = 15
 ticketFrozenTime = 43200
 ticketWithdrawTime = 172800
 ticketMinerWaitTime = 7200
-maxTxNumber = 1500
-targetTimespan = 2160
-targetTimePerBlock = 15
+targetTimespan=2160
+targetTimePerBlock=15
 
-[mver.consensus.ForkChainParamV2]
+[mver.consensus.ticket.ForkChainParamV2]
 coinReward = 5
 coinDevFund = 3
-targetTimespan = 720
-targetTimePerBlock = 5
+targetTimespan=720
+targetTimePerBlock=5
 ticketPrice = 3000
+
+
 
 [consensus.sub.ticket]
 genesisBlockTime=1514533394
@@ -160,13 +171,17 @@ enableMVCCIter=true
 enableMavlPrefix=false
 enableMVCC=false
 enableMavlPrune=false
-pruneHeight=10000
+pruneMavlHeight=10000
+enableMVCCPrune=false
+pruneMVCCHeight=10000
 # 是否使能mavl数据载入内存
 enableMemTree=true
 # 是否使能mavl叶子节点数据载入内存
 enableMemVal=true
 # 缓存close ticket数目，该缓存越大同步速度越快，最大设置到1500000
 tkCloseCacheLen=100000
+# 该参数针对平行链，主链无需开启此功能
+enableEmptyBlockHandle=false
 
 [wallet]
 minFee=100000
@@ -223,4 +238,6 @@ nodeGroupFrozenCoins=0
 #平行链共识停止后主链等待的高度
 paraConsensusStopBlocks=30000
 
-
+[exec.sub.autonomy]
+total="16htvcBNSEA7fZhAdLJphDwQRQJaHpyHTp"
+useBalance=false

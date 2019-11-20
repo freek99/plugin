@@ -45,7 +45,7 @@ type subConfig struct {
 }
 
 // New construct KVMVCCStore module
-func New(cfg *types.Store, sub []byte) queue.Module {
+func New(cfg *types.Store, sub []byte, chain33cfg *types.Chain33Config) queue.Module {
 	bs := drivers.NewBaseStore(cfg)
 	var kvs *KVMVCCStore
 	enable := false
@@ -229,10 +229,7 @@ func (mvccs *KVMVCCStore) saveKVSets(kvset []*types.KeyValue, sync bool) {
 			storeBatch.Set(kvset[i].Key, kvset[i].Value)
 		}
 	}
-	err := storeBatch.Write()
-	if err != nil {
-		klog.Error("store kvmvcc saveKVSets to db failed")
-	}
+	dbm.MustWrite(storeBatch)
 }
 
 func (mvccs *KVMVCCStore) checkVersion(height int64) ([]*types.KeyValue, error) {

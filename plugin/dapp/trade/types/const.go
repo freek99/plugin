@@ -90,4 +90,8 @@ const (
 	ForkTradeBuyLimitX = "ForkTradeBuyLimit"
 	// ForkTradeIDX id without prefix
 	ForkTradeIDX = "ForkTradeID"
+	// ForkTradeFixAssetDBX fix bug: order create before ForkTradeAssetX, cannot trade after ForkTradeAssetX
+	ForkTradeFixAssetDBX = "ForkTradeFixAssetDB"
+	// ForkTradePriceX all asset can be price
+	ForkTradePriceX = "ForkTradePrice"
 )

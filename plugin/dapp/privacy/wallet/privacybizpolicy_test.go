@@ -78,22 +78,26 @@ func (mock *testDataMock) init() {
 }
 
 func (mock *testDataMock) initMember() {
+	cfg := testnode.GetDefaultConfig()
+	mcfg := cfg.GetModuleConfig()
+
 	var q = queue.New("channel")
-	cfg, sub := testnode.GetDefaultConfig()
-	util.ResetDatadir(cfg, "$TEMP/")
-	wallet := wallet.New(cfg.Wallet, sub.Wallet)
+	q.SetConfig(cfg)
+
+	util.ResetDatadir(mcfg, "$TEMP/")
+	wallet := wallet.New(cfg)
 	wallet.SetQueueClient(q.Client())
 	mock.modules = append(mock.modules, wallet)
 	mock.wallet = wallet
 
-	store := store.New(cfg.Store, sub.Store)
+	store := store.New(cfg)
 	store.SetQueueClient(q.Client())
 	mock.modules = append(mock.modules, store)
 
 	if mock.mockBlockChain {
 		mock.mockBlockChainProc(q)
 	} else {
-		chain := blockchain.New(cfg.BlockChain)
+		chain := blockchain.New(cfg)
 		chain.SetQueueClient(q.Client())
 		mock.modules = append(mock.modules, chain)
 	}
@@ -101,13 +105,14 @@ func (mock *testDataMock) initMember() {
 	if mock.mockMempool {
 		mock.mockMempoolProc(q)
 	} else {
-		mempool := mempool.New(cfg.Mempool, nil)
+		mempool := mempool.New(cfg)
 		mempool.SetQueueClient(q.Client())
 		mock.modules = append(mock.modules, mempool)
 	}
 
-	mock.accdb = account.NewCoinsAccount()
+	mock.accdb = account.NewCoinsAccount(cfg)
 	mock.policy = privacy.New()
+	sub := cfg.GetSubConfig()
 	mock.policy.Init(wallet, sub.Wallet["privacy"])
 	mock.password = "ab123456"
 }
@@ -164,8 +169,6 @@ func (mock *testDataMock) importPrivateKey(PrivKey *types.ReqWalletImportPrivkey
 	if Account != nil || err != nil {
 		if Account.Privkey == Encrypteredstr {
 			return
-		} else {
-			return
 		}
 	}
 
@@ -210,7 +213,8 @@ func (mock *testDataMock) initAccounts() {
 		}
 		mock.importPrivateKey(privKey)
 	}
-	accCoin := account.NewCoinsAccount()
+	cfg := mock.wallet.GetAPI().GetConfig()
+	accCoin := account.NewCoinsAccount(cfg)
 	accCoin.SetDB(wallet.GetDBStore())
 	accounts, _ := mock.accdb.LoadAccounts(wallet.GetAPI(), testAddrs)
 	for _, account := range accounts {
@@ -328,38 +332,6 @@ func Test_ShowPrivacyKey(t *testing.T) {
 	}
 }
 
-func Test_CreateUTXOs(t *testing.T) {
-	mock := &testDataMock{mockMempool: true}
-	mock.init()
-	mock.enablePrivacy()
-
-	testCases := []struct {
-		req       *ty.ReqCreateUTXOs
-		needReply *types.Reply
-		needError error
-	}{
-		{
-			needError: types.ErrInvalidParam,
-		},
-		{
-			req: &ty.ReqCreateUTXOs{
-				Tokenname:  types.BTY,
-				Amount:     10 * types.Coin,
-				Note:       "say something",
-				Count:      16,
-				Sender:     testAddrs[0],
-				Pubkeypair: testPubkeyPairs[0],
-			},
-			needError: types.ErrAddrNotExist,
-		},
-	}
-
-	for index, testCase := range testCases {
-		_, getErr := mock.wallet.GetAPI().ExecWalletFunc(ty.PrivacyX, "CreateUTXOs", testCase.req)
-		require.Equalf(t, getErr, testCase.needError, "CreateUTXOs test case index %d", index)
-	}
-}
-
 func Test_CreateTransaction(t *testing.T) {
 	mock := &testDataMock{
 		mockMempool:    true,
@@ -384,6 +356,7 @@ func Test_CreateTransaction(t *testing.T) {
 		},
 		{ // 公对私测试
 			req: &ty.ReqCreatePrivacyTx{
+				AssetExec:  "coins",
 				Tokenname:  types.BTY,
 				Type:       1,
 				Amount:     100 * types.Coin,
@@ -394,6 +367,7 @@ func Test_CreateTransaction(t *testing.T) {
 		},
 		{ // 私对私测试
 			req: &ty.ReqCreatePrivacyTx{
+				AssetExec:  "coins",
 				Tokenname:  types.BTY,
 				Type:       2,
 				Amount:     10 * types.Coin,
@@ -404,6 +378,7 @@ func Test_CreateTransaction(t *testing.T) {
 		},
 		{ // 私对公测试
 			req: &ty.ReqCreatePrivacyTx{
+				AssetExec:  "coins",
 				Tokenname:  types.BTY,
 				Type:       3,
 				Amount:     10 * types.Coin,

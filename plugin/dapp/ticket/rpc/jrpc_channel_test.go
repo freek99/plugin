@@ -18,10 +18,11 @@ import (
 )
 
 func TestJRPCChannel(t *testing.T) {
-	// 启动RPCmocker
-	mocker := testnode.New("--notset--", nil)
-	defer mocker.Close()
+	cfg := types.NewChain33Config(types.GetDefaultCfgstring())
+	cfg.GetModuleConfig().Consensus.Name = "ticket"
+	mocker := testnode.NewWithConfig(cfg, nil)
 	mocker.Listen()
+	defer mocker.Close()
 
 	jrpcClient := mocker.GetJSONC()
 

@@ -4,12 +4,16 @@
 package types
 
 import (
-	context "context"
 	fmt "fmt"
+
+	proto "github.com/golang/protobuf/proto"
+
 	math "math"
 
 	types "github.com/33cn/chain33/types"
-	proto "github.com/golang/protobuf/proto"
+
+	context "golang.org/x/net/context"
+
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,17 +41,16 @@ func (m *ParacrossStatusDetails) Reset()         { *m = ParacrossStatusDetails{}
 func (m *ParacrossStatusDetails) String() string { return proto.CompactTextString(m) }
 func (*ParacrossStatusDetails) ProtoMessage()    {}
 func (*ParacrossStatusDetails) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{0}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{0}
 }
-
 func (m *ParacrossStatusDetails) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossStatusDetails.Unmarshal(m, b)
 }
 func (m *ParacrossStatusDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossStatusDetails.Marshal(b, m, deterministic)
 }
-func (m *ParacrossStatusDetails) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossStatusDetails.Merge(m, src)
+func (dst *ParacrossStatusDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossStatusDetails.Merge(dst, src)
 }
 func (m *ParacrossStatusDetails) XXX_Size() int {
 	return xxx_messageInfo_ParacrossStatusDetails.Size(m)
@@ -72,34 +75,81 @@ func (m *ParacrossStatusDetails) GetBlockHash() [][]byte {
 	return nil
 }
 
+// 记录不同blockHash的详细数据
+type ParacrossStatusBlockDetails struct {
+	BlockHashs           [][]byte `protobuf:"bytes,1,rep,name=blockHashs,proto3" json:"blockHashs,omitempty"`
+	TxResults            [][]byte `protobuf:"bytes,2,rep,name=txResults,proto3" json:"txResults,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ParacrossStatusBlockDetails) Reset()         { *m = ParacrossStatusBlockDetails{} }
+func (m *ParacrossStatusBlockDetails) String() string { return proto.CompactTextString(m) }
+func (*ParacrossStatusBlockDetails) ProtoMessage()    {}
+func (*ParacrossStatusBlockDetails) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{1}
+}
+func (m *ParacrossStatusBlockDetails) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ParacrossStatusBlockDetails.Unmarshal(m, b)
+}
+func (m *ParacrossStatusBlockDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ParacrossStatusBlockDetails.Marshal(b, m, deterministic)
+}
+func (dst *ParacrossStatusBlockDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossStatusBlockDetails.Merge(dst, src)
+}
+func (m *ParacrossStatusBlockDetails) XXX_Size() int {
+	return xxx_messageInfo_ParacrossStatusBlockDetails.Size(m)
+}
+func (m *ParacrossStatusBlockDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParacrossStatusBlockDetails.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParacrossStatusBlockDetails proto.InternalMessageInfo
+
+func (m *ParacrossStatusBlockDetails) GetBlockHashs() [][]byte {
+	if m != nil {
+		return m.BlockHashs
+	}
+	return nil
+}
+
+func (m *ParacrossStatusBlockDetails) GetTxResults() [][]byte {
+	if m != nil {
+		return m.TxResults
+	}
+	return nil
+}
+
 type ParacrossHeightStatus struct {
 	// ing, done
-	Status               int32                   `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
-	Title                string                  `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Height               int64                   `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`
-	Details              *ParacrossStatusDetails `protobuf:"bytes,4,opt,name=details,proto3" json:"details,omitempty"`
-	MainHeight           int64                   `protobuf:"varint,5,opt,name=mainHeight,proto3" json:"mainHeight,omitempty"`
-	MainHash             []byte                  `protobuf:"bytes,6,opt,name=mainHash,proto3" json:"mainHash,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	Status               int32                        `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
+	Title                string                       `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Height               int64                        `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`
+	Details              *ParacrossStatusDetails      `protobuf:"bytes,4,opt,name=details,proto3" json:"details,omitempty"`
+	MainHeight           int64                        `protobuf:"varint,5,opt,name=mainHeight,proto3" json:"mainHeight,omitempty"`
+	MainHash             []byte                       `protobuf:"bytes,6,opt,name=mainHash,proto3" json:"mainHash,omitempty"`
+	BlockDetails         *ParacrossStatusBlockDetails `protobuf:"bytes,7,opt,name=blockDetails,proto3" json:"blockDetails,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
 }
 
 func (m *ParacrossHeightStatus) Reset()         { *m = ParacrossHeightStatus{} }
 func (m *ParacrossHeightStatus) String() string { return proto.CompactTextString(m) }
 func (*ParacrossHeightStatus) ProtoMessage()    {}
 func (*ParacrossHeightStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{1}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{2}
 }
-
 func (m *ParacrossHeightStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossHeightStatus.Unmarshal(m, b)
 }
 func (m *ParacrossHeightStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossHeightStatus.Marshal(b, m, deterministic)
 }
-func (m *ParacrossHeightStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossHeightStatus.Merge(m, src)
+func (dst *ParacrossHeightStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossHeightStatus.Merge(dst, src)
 }
 func (m *ParacrossHeightStatus) XXX_Size() int {
 	return xxx_messageInfo_ParacrossHeightStatus.Size(m)
@@ -152,6 +202,13 @@ func (m *ParacrossHeightStatus) GetMainHash() []byte {
 	return nil
 }
 
+func (m *ParacrossHeightStatus) GetBlockDetails() *ParacrossStatusBlockDetails {
+	if m != nil {
+		return m.BlockDetails
+	}
+	return nil
+}
+
 type ParacrossHeightStatusRsp struct {
 	Status               int32    `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
 	Title                string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
@@ -169,17 +226,16 @@ func (m *ParacrossHeightStatusRsp) Reset()         { *m = ParacrossHeightStatusR
 func (m *ParacrossHeightStatusRsp) String() string { return proto.CompactTextString(m) }
 func (*ParacrossHeightStatusRsp) ProtoMessage()    {}
 func (*ParacrossHeightStatusRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{2}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{3}
 }
-
 func (m *ParacrossHeightStatusRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossHeightStatusRsp.Unmarshal(m, b)
 }
 func (m *ParacrossHeightStatusRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossHeightStatusRsp.Marshal(b, m, deterministic)
 }
-func (m *ParacrossHeightStatusRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossHeightStatusRsp.Merge(m, src)
+func (dst *ParacrossHeightStatusRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossHeightStatusRsp.Merge(dst, src)
 }
 func (m *ParacrossHeightStatusRsp) XXX_Size() int {
 	return xxx_messageInfo_ParacrossHeightStatusRsp.Size(m)
@@ -243,6 +299,8 @@ type ParacrossStatus struct {
 	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Height               int64    `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
 	BlockHash            []byte   `protobuf:"bytes,3,opt,name=blockHash,proto3" json:"blockHash,omitempty"`
+	MainHeight           int64    `protobuf:"varint,4,opt,name=mainHeight,proto3" json:"mainHeight,omitempty"`
+	MainHash             []byte   `protobuf:"bytes,5,opt,name=mainHash,proto3" json:"mainHash,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -252,17 +310,16 @@ func (m *ParacrossStatus) Reset()         { *m = ParacrossStatus{} }
 func (m *ParacrossStatus) String() string { return proto.CompactTextString(m) }
 func (*ParacrossStatus) ProtoMessage()    {}
 func (*ParacrossStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{3}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{4}
 }
-
 func (m *ParacrossStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossStatus.Unmarshal(m, b)
 }
 func (m *ParacrossStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossStatus.Marshal(b, m, deterministic)
 }
-func (m *ParacrossStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossStatus.Merge(m, src)
+func (dst *ParacrossStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossStatus.Merge(dst, src)
 }
 func (m *ParacrossStatus) XXX_Size() int {
 	return xxx_messageInfo_ParacrossStatus.Size(m)
@@ -294,6 +351,20 @@ func (m *ParacrossStatus) GetBlockHash() []byte {
 	return nil
 }
 
+func (m *ParacrossStatus) GetMainHeight() int64 {
+	if m != nil {
+		return m.MainHeight
+	}
+	return 0
+}
+
+func (m *ParacrossStatus) GetMainHash() []byte {
+	if m != nil {
+		return m.MainHash
+	}
+	return nil
+}
+
 type ParacrossConsensusStatus struct {
 	Title                string   `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	ChainHeight          int64    `protobuf:"varint,2,opt,name=chainHeight,proto3" json:"chainHeight,omitempty"`
@@ -308,17 +379,16 @@ func (m *ParacrossConsensusStatus) Reset()         { *m = ParacrossConsensusStat
 func (m *ParacrossConsensusStatus) String() string { return proto.CompactTextString(m) }
 func (*ParacrossConsensusStatus) ProtoMessage()    {}
 func (*ParacrossConsensusStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{4}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{5}
 }
-
 func (m *ParacrossConsensusStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossConsensusStatus.Unmarshal(m, b)
 }
 func (m *ParacrossConsensusStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossConsensusStatus.Marshal(b, m, deterministic)
 }
-func (m *ParacrossConsensusStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossConsensusStatus.Merge(m, src)
+func (dst *ParacrossConsensusStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossConsensusStatus.Merge(dst, src)
 }
 func (m *ParacrossConsensusStatus) XXX_Size() int {
 	return xxx_messageInfo_ParacrossConsensusStatus.Size(m)
@@ -373,17 +443,16 @@ func (m *ParaNodeAddrConfig) Reset()         { *m = ParaNodeAddrConfig{} }
 func (m *ParaNodeAddrConfig) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeAddrConfig) ProtoMessage()    {}
 func (*ParaNodeAddrConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{5}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{6}
 }
-
 func (m *ParaNodeAddrConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeAddrConfig.Unmarshal(m, b)
 }
 func (m *ParaNodeAddrConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeAddrConfig.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeAddrConfig) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeAddrConfig.Merge(m, src)
+func (dst *ParaNodeAddrConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeAddrConfig.Merge(dst, src)
 }
 func (m *ParaNodeAddrConfig) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeAddrConfig.Size(m)
@@ -448,17 +517,16 @@ func (m *ParaNodeVoteDetail) Reset()         { *m = ParaNodeVoteDetail{} }
 func (m *ParaNodeVoteDetail) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeVoteDetail) ProtoMessage()    {}
 func (*ParaNodeVoteDetail) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{6}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{7}
 }
-
 func (m *ParaNodeVoteDetail) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeVoteDetail.Unmarshal(m, b)
 }
 func (m *ParaNodeVoteDetail) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeVoteDetail.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeVoteDetail) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeVoteDetail.Merge(m, src)
+func (dst *ParaNodeVoteDetail) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeVoteDetail.Merge(dst, src)
 }
 func (m *ParaNodeVoteDetail) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeVoteDetail.Size(m)
@@ -498,17 +566,16 @@ func (m *ParaNodeAddrIdStatus) Reset()         { *m = ParaNodeAddrIdStatus{} }
 func (m *ParaNodeAddrIdStatus) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeAddrIdStatus) ProtoMessage()    {}
 func (*ParaNodeAddrIdStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{7}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{8}
 }
-
 func (m *ParaNodeAddrIdStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeAddrIdStatus.Unmarshal(m, b)
 }
 func (m *ParaNodeAddrIdStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeAddrIdStatus.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeAddrIdStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeAddrIdStatus.Merge(m, src)
+func (dst *ParaNodeAddrIdStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeAddrIdStatus.Merge(dst, src)
 }
 func (m *ParaNodeAddrIdStatus) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeAddrIdStatus.Size(m)
@@ -572,17 +639,16 @@ func (m *ParaNodeIdStatus) Reset()         { *m = ParaNodeIdStatus{} }
 func (m *ParaNodeIdStatus) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeIdStatus) ProtoMessage()    {}
 func (*ParaNodeIdStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{8}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{9}
 }
-
 func (m *ParaNodeIdStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeIdStatus.Unmarshal(m, b)
 }
 func (m *ParaNodeIdStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeIdStatus.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeIdStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeIdStatus.Merge(m, src)
+func (dst *ParaNodeIdStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeIdStatus.Merge(dst, src)
 }
 func (m *ParaNodeIdStatus) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeIdStatus.Size(m)
@@ -663,17 +729,16 @@ func (m *ReceiptParaNodeConfig) Reset()         { *m = ReceiptParaNodeConfig{} }
 func (m *ReceiptParaNodeConfig) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParaNodeConfig) ProtoMessage()    {}
 func (*ReceiptParaNodeConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{9}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{10}
 }
-
 func (m *ReceiptParaNodeConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParaNodeConfig.Unmarshal(m, b)
 }
 func (m *ReceiptParaNodeConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParaNodeConfig.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParaNodeConfig) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParaNodeConfig.Merge(m, src)
+func (dst *ReceiptParaNodeConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParaNodeConfig.Merge(dst, src)
 }
 func (m *ReceiptParaNodeConfig) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParaNodeConfig.Size(m)
@@ -725,17 +790,16 @@ func (m *ReceiptParaNodeAddrStatUpdate) Reset()         { *m = ReceiptParaNodeAd
 func (m *ReceiptParaNodeAddrStatUpdate) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParaNodeAddrStatUpdate) ProtoMessage()    {}
 func (*ReceiptParaNodeAddrStatUpdate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{10}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{11}
 }
-
 func (m *ReceiptParaNodeAddrStatUpdate) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParaNodeAddrStatUpdate.Unmarshal(m, b)
 }
 func (m *ReceiptParaNodeAddrStatUpdate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParaNodeAddrStatUpdate.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParaNodeAddrStatUpdate) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParaNodeAddrStatUpdate.Merge(m, src)
+func (dst *ReceiptParaNodeAddrStatUpdate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParaNodeAddrStatUpdate.Merge(dst, src)
 }
 func (m *ReceiptParaNodeAddrStatUpdate) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParaNodeAddrStatUpdate.Size(m)
@@ -785,17 +849,16 @@ func (m *ReceiptParaNodeVoteDone) Reset()         { *m = ReceiptParaNodeVoteDone
 func (m *ReceiptParaNodeVoteDone) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParaNodeVoteDone) ProtoMessage()    {}
 func (*ReceiptParaNodeVoteDone) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{11}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{12}
 }
-
 func (m *ReceiptParaNodeVoteDone) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParaNodeVoteDone.Unmarshal(m, b)
 }
 func (m *ReceiptParaNodeVoteDone) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParaNodeVoteDone.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParaNodeVoteDone) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParaNodeVoteDone.Merge(m, src)
+func (dst *ReceiptParaNodeVoteDone) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParaNodeVoteDone.Merge(dst, src)
 }
 func (m *ReceiptParaNodeVoteDone) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParaNodeVoteDone.Size(m)
@@ -877,17 +940,16 @@ func (m *ParaNodeGroupConfig) Reset()         { *m = ParaNodeGroupConfig{} }
 func (m *ParaNodeGroupConfig) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeGroupConfig) ProtoMessage()    {}
 func (*ParaNodeGroupConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{12}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{13}
 }
-
 func (m *ParaNodeGroupConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeGroupConfig.Unmarshal(m, b)
 }
 func (m *ParaNodeGroupConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeGroupConfig.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeGroupConfig) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeGroupConfig.Merge(m, src)
+func (dst *ParaNodeGroupConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeGroupConfig.Merge(dst, src)
 }
 func (m *ParaNodeGroupConfig) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeGroupConfig.Size(m)
@@ -950,17 +1012,16 @@ func (m *ParaNodeGroupStatus) Reset()         { *m = ParaNodeGroupStatus{} }
 func (m *ParaNodeGroupStatus) String() string { return proto.CompactTextString(m) }
 func (*ParaNodeGroupStatus) ProtoMessage()    {}
 func (*ParaNodeGroupStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{13}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{14}
 }
-
 func (m *ParaNodeGroupStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaNodeGroupStatus.Unmarshal(m, b)
 }
 func (m *ParaNodeGroupStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaNodeGroupStatus.Marshal(b, m, deterministic)
 }
-func (m *ParaNodeGroupStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaNodeGroupStatus.Merge(m, src)
+func (dst *ParaNodeGroupStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaNodeGroupStatus.Merge(dst, src)
 }
 func (m *ParaNodeGroupStatus) XXX_Size() int {
 	return xxx_messageInfo_ParaNodeGroupStatus.Size(m)
@@ -1034,17 +1095,16 @@ func (m *ReceiptParaNodeGroupConfig) Reset()         { *m = ReceiptParaNodeGroup
 func (m *ReceiptParaNodeGroupConfig) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParaNodeGroupConfig) ProtoMessage()    {}
 func (*ReceiptParaNodeGroupConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{14}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{15}
 }
-
 func (m *ReceiptParaNodeGroupConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParaNodeGroupConfig.Unmarshal(m, b)
 }
 func (m *ReceiptParaNodeGroupConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParaNodeGroupConfig.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParaNodeGroupConfig) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParaNodeGroupConfig.Merge(m, src)
+func (dst *ReceiptParaNodeGroupConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParaNodeGroupConfig.Merge(dst, src)
 }
 func (m *ReceiptParaNodeGroupConfig) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParaNodeGroupConfig.Size(m)
@@ -1098,17 +1158,16 @@ func (m *ReqParacrossNodeInfo) Reset()         { *m = ReqParacrossNodeInfo{} }
 func (m *ReqParacrossNodeInfo) String() string { return proto.CompactTextString(m) }
 func (*ReqParacrossNodeInfo) ProtoMessage()    {}
 func (*ReqParacrossNodeInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{15}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{16}
 }
-
 func (m *ReqParacrossNodeInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReqParacrossNodeInfo.Unmarshal(m, b)
 }
 func (m *ReqParacrossNodeInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReqParacrossNodeInfo.Marshal(b, m, deterministic)
 }
-func (m *ReqParacrossNodeInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReqParacrossNodeInfo.Merge(m, src)
+func (dst *ReqParacrossNodeInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqParacrossNodeInfo.Merge(dst, src)
 }
 func (m *ReqParacrossNodeInfo) XXX_Size() int {
 	return xxx_messageInfo_ReqParacrossNodeInfo.Size(m)
@@ -1158,17 +1217,16 @@ func (m *RespParacrossNodeAddrs) Reset()         { *m = RespParacrossNodeAddrs{}
 func (m *RespParacrossNodeAddrs) String() string { return proto.CompactTextString(m) }
 func (*RespParacrossNodeAddrs) ProtoMessage()    {}
 func (*RespParacrossNodeAddrs) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{16}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{17}
 }
-
 func (m *RespParacrossNodeAddrs) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespParacrossNodeAddrs.Unmarshal(m, b)
 }
 func (m *RespParacrossNodeAddrs) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RespParacrossNodeAddrs.Marshal(b, m, deterministic)
 }
-func (m *RespParacrossNodeAddrs) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RespParacrossNodeAddrs.Merge(m, src)
+func (dst *RespParacrossNodeAddrs) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespParacrossNodeAddrs.Merge(dst, src)
 }
 func (m *RespParacrossNodeAddrs) XXX_Size() int {
 	return xxx_messageInfo_RespParacrossNodeAddrs.Size(m)
@@ -1197,17 +1255,16 @@ func (m *RespParacrossNodeGroups) Reset()         { *m = RespParacrossNodeGroups
 func (m *RespParacrossNodeGroups) String() string { return proto.CompactTextString(m) }
 func (*RespParacrossNodeGroups) ProtoMessage()    {}
 func (*RespParacrossNodeGroups) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{17}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{18}
 }
-
 func (m *RespParacrossNodeGroups) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespParacrossNodeGroups.Unmarshal(m, b)
 }
 func (m *RespParacrossNodeGroups) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RespParacrossNodeGroups.Marshal(b, m, deterministic)
 }
-func (m *RespParacrossNodeGroups) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RespParacrossNodeGroups.Merge(m, src)
+func (dst *RespParacrossNodeGroups) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespParacrossNodeGroups.Merge(dst, src)
 }
 func (m *RespParacrossNodeGroups) XXX_Size() int {
 	return xxx_messageInfo_RespParacrossNodeGroups.Size(m)
@@ -1239,17 +1296,16 @@ func (m *ParaBlock2MainMap) Reset()         { *m = ParaBlock2MainMap{} }
 func (m *ParaBlock2MainMap) String() string { return proto.CompactTextString(m) }
 func (*ParaBlock2MainMap) ProtoMessage()    {}
 func (*ParaBlock2MainMap) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{18}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{19}
 }
-
 func (m *ParaBlock2MainMap) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaBlock2MainMap.Unmarshal(m, b)
 }
 func (m *ParaBlock2MainMap) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaBlock2MainMap.Marshal(b, m, deterministic)
 }
-func (m *ParaBlock2MainMap) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaBlock2MainMap.Merge(m, src)
+func (dst *ParaBlock2MainMap) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaBlock2MainMap.Merge(dst, src)
 }
 func (m *ParaBlock2MainMap) XXX_Size() int {
 	return xxx_messageInfo_ParaBlock2MainMap.Size(m)
@@ -1299,17 +1355,16 @@ func (m *ParaBlock2MainInfo) Reset()         { *m = ParaBlock2MainInfo{} }
 func (m *ParaBlock2MainInfo) String() string { return proto.CompactTextString(m) }
 func (*ParaBlock2MainInfo) ProtoMessage()    {}
 func (*ParaBlock2MainInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{19}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{20}
 }
-
 func (m *ParaBlock2MainInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParaBlock2MainInfo.Unmarshal(m, b)
 }
 func (m *ParaBlock2MainInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParaBlock2MainInfo.Marshal(b, m, deterministic)
 }
-func (m *ParaBlock2MainInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParaBlock2MainInfo.Merge(m, src)
+func (dst *ParaBlock2MainInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaBlock2MainInfo.Merge(dst, src)
 }
 func (m *ParaBlock2MainInfo) XXX_Size() int {
 	return xxx_messageInfo_ParaBlock2MainInfo.Size(m)
@@ -1352,17 +1407,16 @@ func (m *ParacrossNodeStatus) Reset()         { *m = ParacrossNodeStatus{} }
 func (m *ParacrossNodeStatus) String() string { return proto.CompactTextString(m) }
 func (*ParacrossNodeStatus) ProtoMessage()    {}
 func (*ParacrossNodeStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{20}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{21}
 }
-
 func (m *ParacrossNodeStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossNodeStatus.Unmarshal(m, b)
 }
 func (m *ParacrossNodeStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossNodeStatus.Marshal(b, m, deterministic)
 }
-func (m *ParacrossNodeStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossNodeStatus.Merge(m, src)
+func (dst *ParacrossNodeStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossNodeStatus.Merge(dst, src)
 }
 func (m *ParacrossNodeStatus) XXX_Size() int {
 	return xxx_messageInfo_ParacrossNodeStatus.Size(m)
@@ -1471,6 +1525,782 @@ func (m *ParacrossNodeStatus) GetNonCommitTxCounts() uint32 {
 	return 0
 }
 
+type SelfConsensStages struct {
+	Items                []*SelfConsensStage `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *SelfConsensStages) Reset()         { *m = SelfConsensStages{} }
+func (m *SelfConsensStages) String() string { return proto.CompactTextString(m) }
+func (*SelfConsensStages) ProtoMessage()    {}
+func (*SelfConsensStages) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{22}
+}
+func (m *SelfConsensStages) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SelfConsensStages.Unmarshal(m, b)
+}
+func (m *SelfConsensStages) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SelfConsensStages.Marshal(b, m, deterministic)
+}
+func (dst *SelfConsensStages) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SelfConsensStages.Merge(dst, src)
+}
+func (m *SelfConsensStages) XXX_Size() int {
+	return xxx_messageInfo_SelfConsensStages.Size(m)
+}
+func (m *SelfConsensStages) XXX_DiscardUnknown() {
+	xxx_messageInfo_SelfConsensStages.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SelfConsensStages proto.InternalMessageInfo
+
+func (m *SelfConsensStages) GetItems() []*SelfConsensStage {
+	if m != nil {
+		return m.Items
+	}
+	return nil
+}
+
+type SelfConsensStage struct {
+	StartHeight          int64    `protobuf:"varint,1,opt,name=startHeight,proto3" json:"startHeight,omitempty"`
+	Enable               uint32   `protobuf:"varint,2,opt,name=enable,proto3" json:"enable,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SelfConsensStage) Reset()         { *m = SelfConsensStage{} }
+func (m *SelfConsensStage) String() string { return proto.CompactTextString(m) }
+func (*SelfConsensStage) ProtoMessage()    {}
+func (*SelfConsensStage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{23}
+}
+func (m *SelfConsensStage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SelfConsensStage.Unmarshal(m, b)
+}
+func (m *SelfConsensStage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SelfConsensStage.Marshal(b, m, deterministic)
+}
+func (dst *SelfConsensStage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SelfConsensStage.Merge(dst, src)
+}
+func (m *SelfConsensStage) XXX_Size() int {
+	return xxx_messageInfo_SelfConsensStage.Size(m)
+}
+func (m *SelfConsensStage) XXX_DiscardUnknown() {
+	xxx_messageInfo_SelfConsensStage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SelfConsensStage proto.InternalMessageInfo
+
+func (m *SelfConsensStage) GetStartHeight() int64 {
+	if m != nil {
+		return m.StartHeight
+	}
+	return 0
+}
+
+func (m *SelfConsensStage) GetEnable() uint32 {
+	if m != nil {
+		return m.Enable
+	}
+	return 0
+}
+
+type SelfConsensStageInfo struct {
+	Id                   string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status               uint32              `protobuf:"varint,2,opt,name=status,proto3" json:"status,omitempty"`
+	Stage                *SelfConsensStage   `protobuf:"bytes,3,opt,name=stage,proto3" json:"stage,omitempty"`
+	FromAddr             string              `protobuf:"bytes,4,opt,name=fromAddr,proto3" json:"fromAddr,omitempty"`
+	ExecHeight           int64               `protobuf:"varint,5,opt,name=execHeight,proto3" json:"execHeight,omitempty"`
+	Votes                *ParaNodeVoteDetail `protobuf:"bytes,6,opt,name=votes,proto3" json:"votes,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *SelfConsensStageInfo) Reset()         { *m = SelfConsensStageInfo{} }
+func (m *SelfConsensStageInfo) String() string { return proto.CompactTextString(m) }
+func (*SelfConsensStageInfo) ProtoMessage()    {}
+func (*SelfConsensStageInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{24}
+}
+func (m *SelfConsensStageInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SelfConsensStageInfo.Unmarshal(m, b)
+}
+func (m *SelfConsensStageInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SelfConsensStageInfo.Marshal(b, m, deterministic)
+}
+func (dst *SelfConsensStageInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SelfConsensStageInfo.Merge(dst, src)
+}
+func (m *SelfConsensStageInfo) XXX_Size() int {
+	return xxx_messageInfo_SelfConsensStageInfo.Size(m)
+}
+func (m *SelfConsensStageInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_SelfConsensStageInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SelfConsensStageInfo proto.InternalMessageInfo
+
+func (m *SelfConsensStageInfo) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *SelfConsensStageInfo) GetStatus() uint32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *SelfConsensStageInfo) GetStage() *SelfConsensStage {
+	if m != nil {
+		return m.Stage
+	}
+	return nil
+}
+
+func (m *SelfConsensStageInfo) GetFromAddr() string {
+	if m != nil {
+		return m.FromAddr
+	}
+	return ""
+}
+
+func (m *SelfConsensStageInfo) GetExecHeight() int64 {
+	if m != nil {
+		return m.ExecHeight
+	}
+	return 0
+}
+
+func (m *SelfConsensStageInfo) GetVotes() *ParaNodeVoteDetail {
+	if m != nil {
+		return m.Votes
+	}
+	return nil
+}
+
+type LocalSelfConsStageInfo struct {
+	Stage                *SelfConsensStageInfo `protobuf:"bytes,1,opt,name=stage,proto3" json:"stage,omitempty"`
+	TxIndex              string                `protobuf:"bytes,2,opt,name=txIndex,proto3" json:"txIndex,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
+}
+
+func (m *LocalSelfConsStageInfo) Reset()         { *m = LocalSelfConsStageInfo{} }
+func (m *LocalSelfConsStageInfo) String() string { return proto.CompactTextString(m) }
+func (*LocalSelfConsStageInfo) ProtoMessage()    {}
+func (*LocalSelfConsStageInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{25}
+}
+func (m *LocalSelfConsStageInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LocalSelfConsStageInfo.Unmarshal(m, b)
+}
+func (m *LocalSelfConsStageInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LocalSelfConsStageInfo.Marshal(b, m, deterministic)
+}
+func (dst *LocalSelfConsStageInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LocalSelfConsStageInfo.Merge(dst, src)
+}
+func (m *LocalSelfConsStageInfo) XXX_Size() int {
+	return xxx_messageInfo_LocalSelfConsStageInfo.Size(m)
+}
+func (m *LocalSelfConsStageInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_LocalSelfConsStageInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LocalSelfConsStageInfo proto.InternalMessageInfo
+
+func (m *LocalSelfConsStageInfo) GetStage() *SelfConsensStageInfo {
+	if m != nil {
+		return m.Stage
+	}
+	return nil
+}
+
+func (m *LocalSelfConsStageInfo) GetTxIndex() string {
+	if m != nil {
+		return m.TxIndex
+	}
+	return ""
+}
+
+type ConfigVoteInfo struct {
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// 投票值　１:ok 2:nok
+	Value                uint32   `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ConfigVoteInfo) Reset()         { *m = ConfigVoteInfo{} }
+func (m *ConfigVoteInfo) String() string { return proto.CompactTextString(m) }
+func (*ConfigVoteInfo) ProtoMessage()    {}
+func (*ConfigVoteInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{26}
+}
+func (m *ConfigVoteInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ConfigVoteInfo.Unmarshal(m, b)
+}
+func (m *ConfigVoteInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ConfigVoteInfo.Marshal(b, m, deterministic)
+}
+func (dst *ConfigVoteInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ConfigVoteInfo.Merge(dst, src)
+}
+func (m *ConfigVoteInfo) XXX_Size() int {
+	return xxx_messageInfo_ConfigVoteInfo.Size(m)
+}
+func (m *ConfigVoteInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ConfigVoteInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ConfigVoteInfo proto.InternalMessageInfo
+
+func (m *ConfigVoteInfo) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ConfigVoteInfo) GetValue() uint32 {
+	if m != nil {
+		return m.Value
+	}
+	return 0
+}
+
+type ConfigCancelInfo struct {
+	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ConfigCancelInfo) Reset()         { *m = ConfigCancelInfo{} }
+func (m *ConfigCancelInfo) String() string { return proto.CompactTextString(m) }
+func (*ConfigCancelInfo) ProtoMessage()    {}
+func (*ConfigCancelInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{27}
+}
+func (m *ConfigCancelInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ConfigCancelInfo.Unmarshal(m, b)
+}
+func (m *ConfigCancelInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ConfigCancelInfo.Marshal(b, m, deterministic)
+}
+func (dst *ConfigCancelInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ConfigCancelInfo.Merge(dst, src)
+}
+func (m *ConfigCancelInfo) XXX_Size() int {
+	return xxx_messageInfo_ConfigCancelInfo.Size(m)
+}
+func (m *ConfigCancelInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ConfigCancelInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ConfigCancelInfo proto.InternalMessageInfo
+
+func (m *ConfigCancelInfo) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+// 广义配置类型
+type ParaStageConfig struct {
+	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	// 配置类型
+	Op uint32 `protobuf:"varint,2,opt,name=op,proto3" json:"op,omitempty"`
+	// Types that are valid to be assigned to Value:
+	//	*ParaStageConfig_Stage
+	//	*ParaStageConfig_Vote
+	//	*ParaStageConfig_Cancel
+	Value                isParaStageConfig_Value `protobuf_oneof:"value"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
+}
+
+func (m *ParaStageConfig) Reset()         { *m = ParaStageConfig{} }
+func (m *ParaStageConfig) String() string { return proto.CompactTextString(m) }
+func (*ParaStageConfig) ProtoMessage()    {}
+func (*ParaStageConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{28}
+}
+func (m *ParaStageConfig) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ParaStageConfig.Unmarshal(m, b)
+}
+func (m *ParaStageConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ParaStageConfig.Marshal(b, m, deterministic)
+}
+func (dst *ParaStageConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaStageConfig.Merge(dst, src)
+}
+func (m *ParaStageConfig) XXX_Size() int {
+	return xxx_messageInfo_ParaStageConfig.Size(m)
+}
+func (m *ParaStageConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParaStageConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParaStageConfig proto.InternalMessageInfo
+
+func (m *ParaStageConfig) GetTitle() string {
+	if m != nil {
+		return m.Title
+	}
+	return ""
+}
+
+func (m *ParaStageConfig) GetOp() uint32 {
+	if m != nil {
+		return m.Op
+	}
+	return 0
+}
+
+type isParaStageConfig_Value interface {
+	isParaStageConfig_Value()
+}
+
+type ParaStageConfig_Stage struct {
+	Stage *SelfConsensStage `protobuf:"bytes,10,opt,name=stage,proto3,oneof"`
+}
+
+type ParaStageConfig_Vote struct {
+	Vote *ConfigVoteInfo `protobuf:"bytes,11,opt,name=vote,proto3,oneof"`
+}
+
+type ParaStageConfig_Cancel struct {
+	Cancel *ConfigCancelInfo `protobuf:"bytes,12,opt,name=cancel,proto3,oneof"`
+}
+
+func (*ParaStageConfig_Stage) isParaStageConfig_Value() {}
+
+func (*ParaStageConfig_Vote) isParaStageConfig_Value() {}
+
+func (*ParaStageConfig_Cancel) isParaStageConfig_Value() {}
+
+func (m *ParaStageConfig) GetValue() isParaStageConfig_Value {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+func (m *ParaStageConfig) GetStage() *SelfConsensStage {
+	if x, ok := m.GetValue().(*ParaStageConfig_Stage); ok {
+		return x.Stage
+	}
+	return nil
+}
+
+func (m *ParaStageConfig) GetVote() *ConfigVoteInfo {
+	if x, ok := m.GetValue().(*ParaStageConfig_Vote); ok {
+		return x.Vote
+	}
+	return nil
+}
+
+func (m *ParaStageConfig) GetCancel() *ConfigCancelInfo {
+	if x, ok := m.GetValue().(*ParaStageConfig_Cancel); ok {
+		return x.Cancel
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*ParaStageConfig) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _ParaStageConfig_OneofMarshaler, _ParaStageConfig_OneofUnmarshaler, _ParaStageConfig_OneofSizer, []interface{}{
+		(*ParaStageConfig_Stage)(nil),
+		(*ParaStageConfig_Vote)(nil),
+		(*ParaStageConfig_Cancel)(nil),
+	}
+}
+
+func _ParaStageConfig_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*ParaStageConfig)
+	// value
+	switch x := m.Value.(type) {
+	case *ParaStageConfig_Stage:
+		b.EncodeVarint(10<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Stage); err != nil {
+			return err
+		}
+	case *ParaStageConfig_Vote:
+		b.EncodeVarint(11<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Vote); err != nil {
+			return err
+		}
+	case *ParaStageConfig_Cancel:
+		b.EncodeVarint(12<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.Cancel); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("ParaStageConfig.Value has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _ParaStageConfig_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*ParaStageConfig)
+	switch tag {
+	case 10: // value.stage
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(SelfConsensStage)
+		err := b.DecodeMessage(msg)
+		m.Value = &ParaStageConfig_Stage{msg}
+		return true, err
+	case 11: // value.vote
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(ConfigVoteInfo)
+		err := b.DecodeMessage(msg)
+		m.Value = &ParaStageConfig_Vote{msg}
+		return true, err
+	case 12: // value.cancel
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(ConfigCancelInfo)
+		err := b.DecodeMessage(msg)
+		m.Value = &ParaStageConfig_Cancel{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _ParaStageConfig_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*ParaStageConfig)
+	// value
+	switch x := m.Value.(type) {
+	case *ParaStageConfig_Stage:
+		s := proto.Size(x.Stage)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *ParaStageConfig_Vote:
+		s := proto.Size(x.Vote)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *ParaStageConfig_Cancel:
+		s := proto.Size(x.Cancel)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+type ReceiptSelfConsStageConfig struct {
+	Prev                 *SelfConsensStageInfo `protobuf:"bytes,1,opt,name=prev,proto3" json:"prev,omitempty"`
+	Current              *SelfConsensStageInfo `protobuf:"bytes,2,opt,name=current,proto3" json:"current,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
+}
+
+func (m *ReceiptSelfConsStageConfig) Reset()         { *m = ReceiptSelfConsStageConfig{} }
+func (m *ReceiptSelfConsStageConfig) String() string { return proto.CompactTextString(m) }
+func (*ReceiptSelfConsStageConfig) ProtoMessage()    {}
+func (*ReceiptSelfConsStageConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{29}
+}
+func (m *ReceiptSelfConsStageConfig) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReceiptSelfConsStageConfig.Unmarshal(m, b)
+}
+func (m *ReceiptSelfConsStageConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReceiptSelfConsStageConfig.Marshal(b, m, deterministic)
+}
+func (dst *ReceiptSelfConsStageConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptSelfConsStageConfig.Merge(dst, src)
+}
+func (m *ReceiptSelfConsStageConfig) XXX_Size() int {
+	return xxx_messageInfo_ReceiptSelfConsStageConfig.Size(m)
+}
+func (m *ReceiptSelfConsStageConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReceiptSelfConsStageConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReceiptSelfConsStageConfig proto.InternalMessageInfo
+
+func (m *ReceiptSelfConsStageConfig) GetPrev() *SelfConsensStageInfo {
+	if m != nil {
+		return m.Prev
+	}
+	return nil
+}
+
+func (m *ReceiptSelfConsStageConfig) GetCurrent() *SelfConsensStageInfo {
+	if m != nil {
+		return m.Current
+	}
+	return nil
+}
+
+type ReceiptSelfConsStageVoteDone struct {
+	Id                   string            `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Stage                *SelfConsensStage `protobuf:"bytes,2,opt,name=stage,proto3" json:"stage,omitempty"`
+	TotalNodes           int32             `protobuf:"varint,3,opt,name=totalNodes,proto3" json:"totalNodes,omitempty"`
+	TotalVote            int32             `protobuf:"varint,4,opt,name=totalVote,proto3" json:"totalVote,omitempty"`
+	MostVote             int32             `protobuf:"varint,5,opt,name=mostVote,proto3" json:"mostVote,omitempty"`
+	VoteRst              string            `protobuf:"bytes,6,opt,name=voteRst,proto3" json:"voteRst,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *ReceiptSelfConsStageVoteDone) Reset()         { *m = ReceiptSelfConsStageVoteDone{} }
+func (m *ReceiptSelfConsStageVoteDone) String() string { return proto.CompactTextString(m) }
+func (*ReceiptSelfConsStageVoteDone) ProtoMessage()    {}
+func (*ReceiptSelfConsStageVoteDone) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{30}
+}
+func (m *ReceiptSelfConsStageVoteDone) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReceiptSelfConsStageVoteDone.Unmarshal(m, b)
+}
+func (m *ReceiptSelfConsStageVoteDone) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReceiptSelfConsStageVoteDone.Marshal(b, m, deterministic)
+}
+func (dst *ReceiptSelfConsStageVoteDone) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptSelfConsStageVoteDone.Merge(dst, src)
+}
+func (m *ReceiptSelfConsStageVoteDone) XXX_Size() int {
+	return xxx_messageInfo_ReceiptSelfConsStageVoteDone.Size(m)
+}
+func (m *ReceiptSelfConsStageVoteDone) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReceiptSelfConsStageVoteDone.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReceiptSelfConsStageVoteDone proto.InternalMessageInfo
+
+func (m *ReceiptSelfConsStageVoteDone) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ReceiptSelfConsStageVoteDone) GetStage() *SelfConsensStage {
+	if m != nil {
+		return m.Stage
+	}
+	return nil
+}
+
+func (m *ReceiptSelfConsStageVoteDone) GetTotalNodes() int32 {
+	if m != nil {
+		return m.TotalNodes
+	}
+	return 0
+}
+
+func (m *ReceiptSelfConsStageVoteDone) GetTotalVote() int32 {
+	if m != nil {
+		return m.TotalVote
+	}
+	return 0
+}
+
+func (m *ReceiptSelfConsStageVoteDone) GetMostVote() int32 {
+	if m != nil {
+		return m.MostVote
+	}
+	return 0
+}
+
+func (m *ReceiptSelfConsStageVoteDone) GetVoteRst() string {
+	if m != nil {
+		return m.VoteRst
+	}
+	return ""
+}
+
+type ReceiptSelfConsStagesUpdate struct {
+	Prev                 *SelfConsensStages `protobuf:"bytes,1,opt,name=prev,proto3" json:"prev,omitempty"`
+	Current              *SelfConsensStages `protobuf:"bytes,2,opt,name=current,proto3" json:"current,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
+}
+
+func (m *ReceiptSelfConsStagesUpdate) Reset()         { *m = ReceiptSelfConsStagesUpdate{} }
+func (m *ReceiptSelfConsStagesUpdate) String() string { return proto.CompactTextString(m) }
+func (*ReceiptSelfConsStagesUpdate) ProtoMessage()    {}
+func (*ReceiptSelfConsStagesUpdate) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{31}
+}
+func (m *ReceiptSelfConsStagesUpdate) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReceiptSelfConsStagesUpdate.Unmarshal(m, b)
+}
+func (m *ReceiptSelfConsStagesUpdate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReceiptSelfConsStagesUpdate.Marshal(b, m, deterministic)
+}
+func (dst *ReceiptSelfConsStagesUpdate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptSelfConsStagesUpdate.Merge(dst, src)
+}
+func (m *ReceiptSelfConsStagesUpdate) XXX_Size() int {
+	return xxx_messageInfo_ReceiptSelfConsStagesUpdate.Size(m)
+}
+func (m *ReceiptSelfConsStagesUpdate) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReceiptSelfConsStagesUpdate.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReceiptSelfConsStagesUpdate proto.InternalMessageInfo
+
+func (m *ReceiptSelfConsStagesUpdate) GetPrev() *SelfConsensStages {
+	if m != nil {
+		return m.Prev
+	}
+	return nil
+}
+
+func (m *ReceiptSelfConsStagesUpdate) GetCurrent() *SelfConsensStages {
+	if m != nil {
+		return m.Current
+	}
+	return nil
+}
+
+// query
+type ReqQuerySelfStages struct {
+	Status               uint32   `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
+	Id                   string   `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Count                int32    `protobuf:"varint,3,opt,name=count,proto3" json:"count,omitempty"`
+	Direction            int32    `protobuf:"varint,4,opt,name=direction,proto3" json:"direction,omitempty"`
+	Height               int64    `protobuf:"varint,5,opt,name=height,proto3" json:"height,omitempty"`
+	Index                int32    `protobuf:"varint,6,opt,name=index,proto3" json:"index,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ReqQuerySelfStages) Reset()         { *m = ReqQuerySelfStages{} }
+func (m *ReqQuerySelfStages) String() string { return proto.CompactTextString(m) }
+func (*ReqQuerySelfStages) ProtoMessage()    {}
+func (*ReqQuerySelfStages) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{32}
+}
+func (m *ReqQuerySelfStages) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReqQuerySelfStages.Unmarshal(m, b)
+}
+func (m *ReqQuerySelfStages) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReqQuerySelfStages.Marshal(b, m, deterministic)
+}
+func (dst *ReqQuerySelfStages) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqQuerySelfStages.Merge(dst, src)
+}
+func (m *ReqQuerySelfStages) XXX_Size() int {
+	return xxx_messageInfo_ReqQuerySelfStages.Size(m)
+}
+func (m *ReqQuerySelfStages) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReqQuerySelfStages.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReqQuerySelfStages proto.InternalMessageInfo
+
+func (m *ReqQuerySelfStages) GetStatus() uint32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *ReqQuerySelfStages) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ReqQuerySelfStages) GetCount() int32 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
+}
+
+func (m *ReqQuerySelfStages) GetDirection() int32 {
+	if m != nil {
+		return m.Direction
+	}
+	return 0
+}
+
+func (m *ReqQuerySelfStages) GetHeight() int64 {
+	if m != nil {
+		return m.Height
+	}
+	return 0
+}
+
+func (m *ReqQuerySelfStages) GetIndex() int32 {
+	if m != nil {
+		return m.Index
+	}
+	return 0
+}
+
+type ReplyQuerySelfStages struct {
+	StageInfo            []*SelfConsensStageInfo `protobuf:"bytes,1,rep,name=stageInfo,proto3" json:"stageInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
+}
+
+func (m *ReplyQuerySelfStages) Reset()         { *m = ReplyQuerySelfStages{} }
+func (m *ReplyQuerySelfStages) String() string { return proto.CompactTextString(m) }
+func (*ReplyQuerySelfStages) ProtoMessage()    {}
+func (*ReplyQuerySelfStages) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{33}
+}
+func (m *ReplyQuerySelfStages) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReplyQuerySelfStages.Unmarshal(m, b)
+}
+func (m *ReplyQuerySelfStages) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReplyQuerySelfStages.Marshal(b, m, deterministic)
+}
+func (dst *ReplyQuerySelfStages) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReplyQuerySelfStages.Merge(dst, src)
+}
+func (m *ReplyQuerySelfStages) XXX_Size() int {
+	return xxx_messageInfo_ReplyQuerySelfStages.Size(m)
+}
+func (m *ReplyQuerySelfStages) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReplyQuerySelfStages.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReplyQuerySelfStages proto.InternalMessageInfo
+
+func (m *ReplyQuerySelfStages) GetStageInfo() []*SelfConsensStageInfo {
+	if m != nil {
+		return m.StageInfo
+	}
+	return nil
+}
+
 type ParacrossCommitAction struct {
 	Status               *ParacrossNodeStatus `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
@@ -1482,17 +2312,16 @@ func (m *ParacrossCommitAction) Reset()         { *m = ParacrossCommitAction{} }
 func (m *ParacrossCommitAction) String() string { return proto.CompactTextString(m) }
 func (*ParacrossCommitAction) ProtoMessage()    {}
 func (*ParacrossCommitAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{21}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{34}
 }
-
 func (m *ParacrossCommitAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossCommitAction.Unmarshal(m, b)
 }
 func (m *ParacrossCommitAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossCommitAction.Marshal(b, m, deterministic)
 }
-func (m *ParacrossCommitAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossCommitAction.Merge(m, src)
+func (dst *ParacrossCommitAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossCommitAction.Merge(dst, src)
 }
 func (m *ParacrossCommitAction) XXX_Size() int {
 	return xxx_messageInfo_ParacrossCommitAction.Size(m)
@@ -1522,17 +2351,16 @@ func (m *ParacrossMinerAction) Reset()         { *m = ParacrossMinerAction{} }
 func (m *ParacrossMinerAction) String() string { return proto.CompactTextString(m) }
 func (*ParacrossMinerAction) ProtoMessage()    {}
 func (*ParacrossMinerAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{22}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{35}
 }
-
 func (m *ParacrossMinerAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossMinerAction.Unmarshal(m, b)
 }
 func (m *ParacrossMinerAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossMinerAction.Marshal(b, m, deterministic)
 }
-func (m *ParacrossMinerAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossMinerAction.Merge(m, src)
+func (dst *ParacrossMinerAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossMinerAction.Merge(dst, src)
 }
 func (m *ParacrossMinerAction) XXX_Size() int {
 	return xxx_messageInfo_ParacrossMinerAction.Size(m)
@@ -1568,6 +2396,7 @@ type ParacrossAction struct {
 	//	*ParacrossAction_TransferToExec
 	//	*ParacrossAction_NodeConfig
 	//	*ParacrossAction_NodeGroupConfig
+	//	*ParacrossAction_SelfStageConfig
 	Value                isParacrossAction_Value `protobuf_oneof:"value"`
 	Ty                   int32                   `protobuf:"varint,2,opt,name=ty,proto3" json:"ty,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
@@ -1579,17 +2408,16 @@ func (m *ParacrossAction) Reset()         { *m = ParacrossAction{} }
 func (m *ParacrossAction) String() string { return proto.CompactTextString(m) }
 func (*ParacrossAction) ProtoMessage()    {}
 func (*ParacrossAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{23}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{36}
 }
-
 func (m *ParacrossAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossAction.Unmarshal(m, b)
 }
 func (m *ParacrossAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossAction.Marshal(b, m, deterministic)
 }
-func (m *ParacrossAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossAction.Merge(m, src)
+func (dst *ParacrossAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossAction.Merge(dst, src)
 }
 func (m *ParacrossAction) XXX_Size() int {
 	return xxx_messageInfo_ParacrossAction.Size(m)
@@ -1640,6 +2468,10 @@ type ParacrossAction_NodeGroupConfig struct {
 	NodeGroupConfig *ParaNodeGroupConfig `protobuf:"bytes,10,opt,name=nodeGroupConfig,proto3,oneof"`
 }
 
+type ParacrossAction_SelfStageConfig struct {
+	SelfStageConfig *ParaStageConfig `protobuf:"bytes,11,opt,name=selfStageConfig,proto3,oneof"`
+}
+
 func (*ParacrossAction_Commit) isParacrossAction_Value() {}
 
 func (*ParacrossAction_Miner) isParacrossAction_Value() {}
@@ -1657,6 +2489,8 @@ func (*ParacrossAction_TransferToExec) isParacrossAction_Value() {}
 func (*ParacrossAction_NodeConfig) isParacrossAction_Value() {}
 
 func (*ParacrossAction_NodeGroupConfig) isParacrossAction_Value() {}
+
+func (*ParacrossAction_SelfStageConfig) isParacrossAction_Value() {}
 
 func (m *ParacrossAction) GetValue() isParacrossAction_Value {
 	if m != nil {
@@ -1728,6 +2562,13 @@ func (m *ParacrossAction) GetNodeGroupConfig() *ParaNodeGroupConfig {
 	return nil
 }
 
+func (m *ParacrossAction) GetSelfStageConfig() *ParaStageConfig {
+	if x, ok := m.GetValue().(*ParacrossAction_SelfStageConfig); ok {
+		return x.SelfStageConfig
+	}
+	return nil
+}
+
 func (m *ParacrossAction) GetTy() int32 {
 	if m != nil {
 		return m.Ty
@@ -1747,6 +2588,7 @@ func (*ParacrossAction) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffe
 		(*ParacrossAction_TransferToExec)(nil),
 		(*ParacrossAction_NodeConfig)(nil),
 		(*ParacrossAction_NodeGroupConfig)(nil),
+		(*ParacrossAction_SelfStageConfig)(nil),
 	}
 }
 
@@ -1797,6 +2639,11 @@ func _ParacrossAction_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 	case *ParacrossAction_NodeGroupConfig:
 		b.EncodeVarint(10<<3 | proto.WireBytes)
 		if err := b.EncodeMessage(x.NodeGroupConfig); err != nil {
+			return err
+		}
+	case *ParacrossAction_SelfStageConfig:
+		b.EncodeVarint(11<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.SelfStageConfig); err != nil {
 			return err
 		}
 	case nil:
@@ -1881,6 +2728,14 @@ func _ParacrossAction_OneofUnmarshaler(msg proto.Message, tag, wire int, b *prot
 		err := b.DecodeMessage(msg)
 		m.Value = &ParacrossAction_NodeGroupConfig{msg}
 		return true, err
+	case 11: // value.selfStageConfig
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(ParaStageConfig)
+		err := b.DecodeMessage(msg)
+		m.Value = &ParacrossAction_SelfStageConfig{msg}
+		return true, err
 	default:
 		return false, nil
 	}
@@ -1935,6 +2790,11 @@ func _ParacrossAction_OneofSizer(msg proto.Message) (n int) {
 		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
+	case *ParacrossAction_SelfStageConfig:
+		s := proto.Size(x.SelfStageConfig)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
 	case nil:
 	default:
 		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
@@ -1957,17 +2817,16 @@ func (m *ReceiptParacrossCommit) Reset()         { *m = ReceiptParacrossCommit{}
 func (m *ReceiptParacrossCommit) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParacrossCommit) ProtoMessage()    {}
 func (*ReceiptParacrossCommit) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{24}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{37}
 }
-
 func (m *ReceiptParacrossCommit) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParacrossCommit.Unmarshal(m, b)
 }
 func (m *ReceiptParacrossCommit) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParacrossCommit.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParacrossCommit) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParacrossCommit.Merge(m, src)
+func (dst *ReceiptParacrossCommit) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParacrossCommit.Merge(dst, src)
 }
 func (m *ReceiptParacrossCommit) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParacrossCommit.Size(m)
@@ -2017,17 +2876,16 @@ func (m *ReceiptParacrossMiner) Reset()         { *m = ReceiptParacrossMiner{} }
 func (m *ReceiptParacrossMiner) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParacrossMiner) ProtoMessage()    {}
 func (*ReceiptParacrossMiner) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{25}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{38}
 }
-
 func (m *ReceiptParacrossMiner) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParacrossMiner.Unmarshal(m, b)
 }
 func (m *ReceiptParacrossMiner) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParacrossMiner.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParacrossMiner) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParacrossMiner.Merge(m, src)
+func (dst *ReceiptParacrossMiner) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParacrossMiner.Merge(dst, src)
 }
 func (m *ReceiptParacrossMiner) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParacrossMiner.Size(m)
@@ -2054,6 +2912,12 @@ type ReceiptParacrossDone struct {
 	StateHash            []byte   `protobuf:"bytes,6,opt,name=stateHash,proto3" json:"stateHash,omitempty"`
 	TxCounts             uint32   `protobuf:"varint,7,opt,name=txCounts,proto3" json:"txCounts,omitempty"`
 	TxResult             []byte   `protobuf:"bytes,8,opt,name=txResult,proto3" json:"txResult,omitempty"`
+	BlockHash            []byte   `protobuf:"bytes,9,opt,name=blockHash,proto3" json:"blockHash,omitempty"`
+	TxHashs              [][]byte `protobuf:"bytes,10,rep,name=txHashs,proto3" json:"txHashs,omitempty"`
+	CrossTxResult        []byte   `protobuf:"bytes,11,opt,name=crossTxResult,proto3" json:"crossTxResult,omitempty"`
+	CrossTxHashs         [][]byte `protobuf:"bytes,12,rep,name=crossTxHashs,proto3" json:"crossTxHashs,omitempty"`
+	MainBlockHash        []byte   `protobuf:"bytes,13,opt,name=mainBlockHash,proto3" json:"mainBlockHash,omitempty"`
+	MainBlockHeight      int64    `protobuf:"varint,14,opt,name=mainBlockHeight,proto3" json:"mainBlockHeight,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -2063,17 +2927,16 @@ func (m *ReceiptParacrossDone) Reset()         { *m = ReceiptParacrossDone{} }
 func (m *ReceiptParacrossDone) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParacrossDone) ProtoMessage()    {}
 func (*ReceiptParacrossDone) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{26}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{39}
 }
-
 func (m *ReceiptParacrossDone) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParacrossDone.Unmarshal(m, b)
 }
 func (m *ReceiptParacrossDone) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParacrossDone.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParacrossDone) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParacrossDone.Merge(m, src)
+func (dst *ReceiptParacrossDone) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParacrossDone.Merge(dst, src)
 }
 func (m *ReceiptParacrossDone) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParacrossDone.Size(m)
@@ -2140,6 +3003,48 @@ func (m *ReceiptParacrossDone) GetTxResult() []byte {
 	return nil
 }
 
+func (m *ReceiptParacrossDone) GetBlockHash() []byte {
+	if m != nil {
+		return m.BlockHash
+	}
+	return nil
+}
+
+func (m *ReceiptParacrossDone) GetTxHashs() [][]byte {
+	if m != nil {
+		return m.TxHashs
+	}
+	return nil
+}
+
+func (m *ReceiptParacrossDone) GetCrossTxResult() []byte {
+	if m != nil {
+		return m.CrossTxResult
+	}
+	return nil
+}
+
+func (m *ReceiptParacrossDone) GetCrossTxHashs() [][]byte {
+	if m != nil {
+		return m.CrossTxHashs
+	}
+	return nil
+}
+
+func (m *ReceiptParacrossDone) GetMainBlockHash() []byte {
+	if m != nil {
+		return m.MainBlockHash
+	}
+	return nil
+}
+
+func (m *ReceiptParacrossDone) GetMainBlockHeight() int64 {
+	if m != nil {
+		return m.MainBlockHeight
+	}
+	return 0
+}
+
 type ReceiptParacrossRecord struct {
 	Addr                 string               `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
 	Status               *ParacrossNodeStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
@@ -2152,17 +3057,16 @@ func (m *ReceiptParacrossRecord) Reset()         { *m = ReceiptParacrossRecord{}
 func (m *ReceiptParacrossRecord) String() string { return proto.CompactTextString(m) }
 func (*ReceiptParacrossRecord) ProtoMessage()    {}
 func (*ReceiptParacrossRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{27}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{40}
 }
-
 func (m *ReceiptParacrossRecord) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReceiptParacrossRecord.Unmarshal(m, b)
 }
 func (m *ReceiptParacrossRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReceiptParacrossRecord.Marshal(b, m, deterministic)
 }
-func (m *ReceiptParacrossRecord) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReceiptParacrossRecord.Merge(m, src)
+func (dst *ReceiptParacrossRecord) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReceiptParacrossRecord.Merge(dst, src)
 }
 func (m *ReceiptParacrossRecord) XXX_Size() int {
 	return xxx_messageInfo_ReceiptParacrossRecord.Size(m)
@@ -2200,17 +3104,16 @@ func (m *ParacrossTx) Reset()         { *m = ParacrossTx{} }
 func (m *ParacrossTx) String() string { return proto.CompactTextString(m) }
 func (*ParacrossTx) ProtoMessage()    {}
 func (*ParacrossTx) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{28}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{41}
 }
-
 func (m *ParacrossTx) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossTx.Unmarshal(m, b)
 }
 func (m *ParacrossTx) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossTx.Marshal(b, m, deterministic)
 }
-func (m *ParacrossTx) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossTx.Merge(m, src)
+func (dst *ParacrossTx) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossTx.Merge(dst, src)
 }
 func (m *ParacrossTx) XXX_Size() int {
 	return xxx_messageInfo_ParacrossTx.Size(m)
@@ -2241,17 +3144,16 @@ func (m *ReqParacrossTitleHeight) Reset()         { *m = ReqParacrossTitleHeight
 func (m *ReqParacrossTitleHeight) String() string { return proto.CompactTextString(m) }
 func (*ReqParacrossTitleHeight) ProtoMessage()    {}
 func (*ReqParacrossTitleHeight) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{29}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{42}
 }
-
 func (m *ReqParacrossTitleHeight) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReqParacrossTitleHeight.Unmarshal(m, b)
 }
 func (m *ReqParacrossTitleHeight) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReqParacrossTitleHeight.Marshal(b, m, deterministic)
 }
-func (m *ReqParacrossTitleHeight) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReqParacrossTitleHeight.Merge(m, src)
+func (dst *ReqParacrossTitleHeight) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqParacrossTitleHeight.Merge(dst, src)
 }
 func (m *ReqParacrossTitleHeight) XXX_Size() int {
 	return xxx_messageInfo_ReqParacrossTitleHeight.Size(m)
@@ -2294,17 +3196,16 @@ func (m *RespParacrossDone) Reset()         { *m = RespParacrossDone{} }
 func (m *RespParacrossDone) String() string { return proto.CompactTextString(m) }
 func (*RespParacrossDone) ProtoMessage()    {}
 func (*RespParacrossDone) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{30}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{43}
 }
-
 func (m *RespParacrossDone) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespParacrossDone.Unmarshal(m, b)
 }
 func (m *RespParacrossDone) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RespParacrossDone.Marshal(b, m, deterministic)
 }
-func (m *RespParacrossDone) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RespParacrossDone.Merge(m, src)
+func (dst *RespParacrossDone) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespParacrossDone.Merge(dst, src)
 }
 func (m *RespParacrossDone) XXX_Size() int {
 	return xxx_messageInfo_RespParacrossDone.Size(m)
@@ -2382,17 +3283,16 @@ func (m *RespParacrossTitles) Reset()         { *m = RespParacrossTitles{} }
 func (m *RespParacrossTitles) String() string { return proto.CompactTextString(m) }
 func (*RespParacrossTitles) ProtoMessage()    {}
 func (*RespParacrossTitles) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{31}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{44}
 }
-
 func (m *RespParacrossTitles) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RespParacrossTitles.Unmarshal(m, b)
 }
 func (m *RespParacrossTitles) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RespParacrossTitles.Marshal(b, m, deterministic)
 }
-func (m *RespParacrossTitles) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RespParacrossTitles.Merge(m, src)
+func (dst *RespParacrossTitles) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespParacrossTitles.Merge(dst, src)
 }
 func (m *RespParacrossTitles) XXX_Size() int {
 	return xxx_messageInfo_RespParacrossTitles.Size(m)
@@ -2422,17 +3322,16 @@ func (m *ReqParacrossTitleHash) Reset()         { *m = ReqParacrossTitleHash{} }
 func (m *ReqParacrossTitleHash) String() string { return proto.CompactTextString(m) }
 func (*ReqParacrossTitleHash) ProtoMessage()    {}
 func (*ReqParacrossTitleHash) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{32}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{45}
 }
-
 func (m *ReqParacrossTitleHash) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReqParacrossTitleHash.Unmarshal(m, b)
 }
 func (m *ReqParacrossTitleHash) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReqParacrossTitleHash.Marshal(b, m, deterministic)
 }
-func (m *ReqParacrossTitleHash) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReqParacrossTitleHash.Merge(m, src)
+func (dst *ReqParacrossTitleHash) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqParacrossTitleHash.Merge(dst, src)
 }
 func (m *ReqParacrossTitleHash) XXX_Size() int {
 	return xxx_messageInfo_ReqParacrossTitleHash.Size(m)
@@ -2482,17 +3381,16 @@ func (m *ParacrossAsset) Reset()         { *m = ParacrossAsset{} }
 func (m *ParacrossAsset) String() string { return proto.CompactTextString(m) }
 func (*ParacrossAsset) ProtoMessage()    {}
 func (*ParacrossAsset) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6a397e38c9ea6747, []int{33}
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{46}
 }
-
 func (m *ParacrossAsset) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ParacrossAsset.Unmarshal(m, b)
 }
 func (m *ParacrossAsset) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ParacrossAsset.Marshal(b, m, deterministic)
 }
-func (m *ParacrossAsset) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ParacrossAsset.Merge(m, src)
+func (dst *ParacrossAsset) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParacrossAsset.Merge(dst, src)
 }
 func (m *ParacrossAsset) XXX_Size() int {
 	return xxx_messageInfo_ParacrossAsset.Size(m)
@@ -2580,8 +3478,165 @@ func (m *ParacrossAsset) GetSuccess() bool {
 	return false
 }
 
+type ParaLocalDbBlock struct {
+	Height               int64                `protobuf:"varint,1,opt,name=height,proto3" json:"height,omitempty"`
+	MainHash             []byte               `protobuf:"bytes,2,opt,name=mainHash,proto3" json:"mainHash,omitempty"`
+	MainHeight           int64                `protobuf:"varint,3,opt,name=mainHeight,proto3" json:"mainHeight,omitempty"`
+	ParentMainHash       []byte               `protobuf:"bytes,4,opt,name=parentMainHash,proto3" json:"parentMainHash,omitempty"`
+	BlockTime            int64                `protobuf:"varint,5,opt,name=blockTime,proto3" json:"blockTime,omitempty"`
+	Txs                  []*types.Transaction `protobuf:"bytes,6,rep,name=txs,proto3" json:"txs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *ParaLocalDbBlock) Reset()         { *m = ParaLocalDbBlock{} }
+func (m *ParaLocalDbBlock) String() string { return proto.CompactTextString(m) }
+func (*ParaLocalDbBlock) ProtoMessage()    {}
+func (*ParaLocalDbBlock) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{47}
+}
+func (m *ParaLocalDbBlock) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ParaLocalDbBlock.Unmarshal(m, b)
+}
+func (m *ParaLocalDbBlock) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ParaLocalDbBlock.Marshal(b, m, deterministic)
+}
+func (dst *ParaLocalDbBlock) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaLocalDbBlock.Merge(dst, src)
+}
+func (m *ParaLocalDbBlock) XXX_Size() int {
+	return xxx_messageInfo_ParaLocalDbBlock.Size(m)
+}
+func (m *ParaLocalDbBlock) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParaLocalDbBlock.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParaLocalDbBlock proto.InternalMessageInfo
+
+func (m *ParaLocalDbBlock) GetHeight() int64 {
+	if m != nil {
+		return m.Height
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlock) GetMainHash() []byte {
+	if m != nil {
+		return m.MainHash
+	}
+	return nil
+}
+
+func (m *ParaLocalDbBlock) GetMainHeight() int64 {
+	if m != nil {
+		return m.MainHeight
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlock) GetParentMainHash() []byte {
+	if m != nil {
+		return m.ParentMainHash
+	}
+	return nil
+}
+
+func (m *ParaLocalDbBlock) GetBlockTime() int64 {
+	if m != nil {
+		return m.BlockTime
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlock) GetTxs() []*types.Transaction {
+	if m != nil {
+		return m.Txs
+	}
+	return nil
+}
+
+type ParaLocalDbBlockInfo struct {
+	Height               int64    `protobuf:"varint,1,opt,name=height,proto3" json:"height,omitempty"`
+	MainHash             string   `protobuf:"bytes,2,opt,name=mainHash,proto3" json:"mainHash,omitempty"`
+	MainHeight           int64    `protobuf:"varint,3,opt,name=mainHeight,proto3" json:"mainHeight,omitempty"`
+	ParentMainHash       string   `protobuf:"bytes,4,opt,name=parentMainHash,proto3" json:"parentMainHash,omitempty"`
+	BlockTime            int64    `protobuf:"varint,5,opt,name=blockTime,proto3" json:"blockTime,omitempty"`
+	Txs                  []string `protobuf:"bytes,6,rep,name=txs,proto3" json:"txs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ParaLocalDbBlockInfo) Reset()         { *m = ParaLocalDbBlockInfo{} }
+func (m *ParaLocalDbBlockInfo) String() string { return proto.CompactTextString(m) }
+func (*ParaLocalDbBlockInfo) ProtoMessage()    {}
+func (*ParaLocalDbBlockInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_paracross_e0081cf2748ff01a, []int{48}
+}
+func (m *ParaLocalDbBlockInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ParaLocalDbBlockInfo.Unmarshal(m, b)
+}
+func (m *ParaLocalDbBlockInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ParaLocalDbBlockInfo.Marshal(b, m, deterministic)
+}
+func (dst *ParaLocalDbBlockInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ParaLocalDbBlockInfo.Merge(dst, src)
+}
+func (m *ParaLocalDbBlockInfo) XXX_Size() int {
+	return xxx_messageInfo_ParaLocalDbBlockInfo.Size(m)
+}
+func (m *ParaLocalDbBlockInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ParaLocalDbBlockInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ParaLocalDbBlockInfo proto.InternalMessageInfo
+
+func (m *ParaLocalDbBlockInfo) GetHeight() int64 {
+	if m != nil {
+		return m.Height
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlockInfo) GetMainHash() string {
+	if m != nil {
+		return m.MainHash
+	}
+	return ""
+}
+
+func (m *ParaLocalDbBlockInfo) GetMainHeight() int64 {
+	if m != nil {
+		return m.MainHeight
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlockInfo) GetParentMainHash() string {
+	if m != nil {
+		return m.ParentMainHash
+	}
+	return ""
+}
+
+func (m *ParaLocalDbBlockInfo) GetBlockTime() int64 {
+	if m != nil {
+		return m.BlockTime
+	}
+	return 0
+}
+
+func (m *ParaLocalDbBlockInfo) GetTxs() []string {
+	if m != nil {
+		return m.Txs
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*ParacrossStatusDetails)(nil), "types.ParacrossStatusDetails")
+	proto.RegisterType((*ParacrossStatusBlockDetails)(nil), "types.ParacrossStatusBlockDetails")
 	proto.RegisterType((*ParacrossHeightStatus)(nil), "types.ParacrossHeightStatus")
 	proto.RegisterType((*ParacrossHeightStatusRsp)(nil), "types.ParacrossHeightStatusRsp")
 	proto.RegisterType((*ParacrossStatus)(nil), "types.ParacrossStatus")
@@ -2602,6 +3657,18 @@ func init() {
 	proto.RegisterType((*ParaBlock2MainMap)(nil), "types.ParaBlock2MainMap")
 	proto.RegisterType((*ParaBlock2MainInfo)(nil), "types.ParaBlock2MainInfo")
 	proto.RegisterType((*ParacrossNodeStatus)(nil), "types.ParacrossNodeStatus")
+	proto.RegisterType((*SelfConsensStages)(nil), "types.SelfConsensStages")
+	proto.RegisterType((*SelfConsensStage)(nil), "types.SelfConsensStage")
+	proto.RegisterType((*SelfConsensStageInfo)(nil), "types.SelfConsensStageInfo")
+	proto.RegisterType((*LocalSelfConsStageInfo)(nil), "types.LocalSelfConsStageInfo")
+	proto.RegisterType((*ConfigVoteInfo)(nil), "types.ConfigVoteInfo")
+	proto.RegisterType((*ConfigCancelInfo)(nil), "types.ConfigCancelInfo")
+	proto.RegisterType((*ParaStageConfig)(nil), "types.ParaStageConfig")
+	proto.RegisterType((*ReceiptSelfConsStageConfig)(nil), "types.ReceiptSelfConsStageConfig")
+	proto.RegisterType((*ReceiptSelfConsStageVoteDone)(nil), "types.ReceiptSelfConsStageVoteDone")
+	proto.RegisterType((*ReceiptSelfConsStagesUpdate)(nil), "types.ReceiptSelfConsStagesUpdate")
+	proto.RegisterType((*ReqQuerySelfStages)(nil), "types.ReqQuerySelfStages")
+	proto.RegisterType((*ReplyQuerySelfStages)(nil), "types.ReplyQuerySelfStages")
 	proto.RegisterType((*ParacrossCommitAction)(nil), "types.ParacrossCommitAction")
 	proto.RegisterType((*ParacrossMinerAction)(nil), "types.ParacrossMinerAction")
 	proto.RegisterType((*ParacrossAction)(nil), "types.ParacrossAction")
@@ -2615,126 +3682,8 @@ func init() {
 	proto.RegisterType((*RespParacrossTitles)(nil), "types.RespParacrossTitles")
 	proto.RegisterType((*ReqParacrossTitleHash)(nil), "types.ReqParacrossTitleHash")
 	proto.RegisterType((*ParacrossAsset)(nil), "types.ParacrossAsset")
-}
-
-func init() { proto.RegisterFile("paracross.proto", fileDescriptor_6a397e38c9ea6747) }
-
-var fileDescriptor_6a397e38c9ea6747 = []byte{
-	// 1819 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x59, 0xcd, 0x6f, 0x24, 0x47,
-	0x15, 0x9f, 0x9e, 0x4f, 0xcf, 0xb3, 0x3d, 0x6b, 0x57, 0xd6, 0xde, 0x61, 0x48, 0x36, 0xa3, 0x56,
-	0x40, 0x06, 0x56, 0x0e, 0xf1, 0x42, 0x10, 0x8a, 0x10, 0x6c, 0x9c, 0xc4, 0x63, 0x25, 0x1b, 0x45,
-	0x6d, 0x07, 0x4e, 0x48, 0xf4, 0xce, 0x94, 0x3d, 0x2d, 0x66, 0xba, 0x7b, 0xbb, 0x6a, 0x12, 0x9b,
-	0x1b, 0x02, 0xee, 0x9c, 0x90, 0x38, 0xc3, 0x99, 0x3f, 0x81, 0x3f, 0x80, 0xdc, 0xf8, 0x0f, 0xb8,
-	0x71, 0xe7, 0xc0, 0x15, 0xbd, 0x57, 0x55, 0xdd, 0x55, 0x35, 0x1f, 0x6b, 0x2d, 0x7b, 0xc9, 0xcd,
-	0xef, 0xd5, 0xab, 0xf7, 0xf1, 0xab, 0xf7, 0xd5, 0x63, 0xb8, 0x97, 0xc7, 0x45, 0x3c, 0x2e, 0x32,
-	0x21, 0x8e, 0xf3, 0x22, 0x93, 0x19, 0x6b, 0xc9, 0xdb, 0x9c, 0x8b, 0xc1, 0xbe, 0x2c, 0xe2, 0x54,
-	0xc4, 0x63, 0x99, 0x64, 0xa9, 0x3a, 0x19, 0xec, 0x8c, 0xb3, 0xf9, 0xbc, 0xa4, 0xf6, 0x9e, 0xcd,
-	0xb2, 0xf1, 0xaf, 0xc7, 0xd3, 0x38, 0x31, 0x9c, 0x1e, 0xbf, 0xe1, 0xe3, 0x85, 0xcc, 0x0a, 0x45,
-	0x87, 0x9f, 0xc0, 0xe1, 0x67, 0x46, 0xf9, 0x85, 0x8c, 0xe5, 0x42, 0x7c, 0xc0, 0x65, 0x9c, 0xcc,
-	0x04, 0xbb, 0x0f, 0xad, 0x78, 0x32, 0x29, 0x44, 0x3f, 0x18, 0x36, 0x8e, 0xba, 0x91, 0x22, 0xd8,
-	0xeb, 0xd0, 0x25, 0x9d, 0xa3, 0x58, 0x4c, 0xfb, 0xf5, 0x61, 0xe3, 0x68, 0x27, 0xaa, 0x18, 0xe1,
-	0x3f, 0x03, 0x38, 0x28, 0xd5, 0x8d, 0x78, 0x72, 0x3d, 0x95, 0x4a, 0x29, 0x3b, 0x84, 0xb6, 0xa0,
-	0xbf, 0xfa, 0xc1, 0x30, 0x38, 0x6a, 0x45, 0x9a, 0x42, 0x2b, 0x32, 0x91, 0x33, 0xde, 0xaf, 0x0f,
-	0x03, 0xb4, 0x42, 0x04, 0x4a, 0x4f, 0xe9, 0x76, 0xbf, 0x31, 0x0c, 0x8e, 0x1a, 0x91, 0xa6, 0xd8,
-	0x8f, 0xa0, 0x33, 0x51, 0xee, 0xf5, 0x9b, 0xc3, 0xe0, 0x68, 0xfb, 0xe4, 0x8d, 0x63, 0x42, 0xe2,
-	0x78, 0x75, 0x0c, 0x91, 0x91, 0x66, 0x0f, 0x01, 0xe6, 0x71, 0x92, 0x2a, 0x97, 0xfa, 0x2d, 0x52,
-	0x6a, 0x71, 0xd8, 0x00, 0xb6, 0x88, 0xc2, 0xa8, 0xda, 0xc3, 0xe0, 0x68, 0x27, 0x2a, 0xe9, 0xf0,
-	0xdf, 0x01, 0xf4, 0x57, 0x06, 0x15, 0x89, 0xfc, 0x15, 0xc5, 0xe5, 0xba, 0xd7, 0xdc, 0xe8, 0x5e,
-	0x8b, 0x14, 0x96, 0x34, 0x1b, 0xc2, 0x36, 0xbe, 0x79, 0x22, 0x9f, 0xd0, 0x6b, 0xb5, 0xe9, 0xb5,
-	0x6c, 0x16, 0x3b, 0x82, 0x7b, 0x8a, 0x7c, 0xbf, 0x7c, 0xb9, 0x0e, 0x49, 0xf9, 0xec, 0xf0, 0x97,
-	0x70, 0xcf, 0x43, 0xb2, 0x0a, 0x24, 0x58, 0x1d, 0x48, 0xdd, 0x09, 0xc4, 0x49, 0x8f, 0x06, 0x01,
-	0x69, 0xa5, 0xc7, 0x5f, 0x6d, 0x24, 0x4f, 0xb3, 0x54, 0xf0, 0x54, 0x2c, 0x36, 0x1b, 0xc2, 0xe8,
-	0xa6, 0x15, 0x34, 0xca, 0x9a, 0xcd, 0x62, 0x6f, 0xc1, 0xee, 0x58, 0xa9, 0x1a, 0xd9, 0xd0, 0xba,
-	0x4c, 0xf6, 0x5d, 0xd8, 0xd3, 0x8c, 0x0a, 0x84, 0x26, 0x19, 0x5a, 0xe2, 0x87, 0x7f, 0x0a, 0x80,
-	0xa1, 0x9b, 0x9f, 0x66, 0x13, 0x8e, 0x08, 0x9e, 0x66, 0xe9, 0x55, 0x72, 0xbd, 0xc6, 0xc1, 0x1e,
-	0xd4, 0xb3, 0x9c, 0xfc, 0xda, 0x8d, 0xea, 0x59, 0x8e, 0x74, 0x32, 0x21, 0x1f, 0xba, 0x51, 0x3d,
-	0x99, 0x30, 0x06, 0x4d, 0xac, 0x1c, 0x6d, 0x8c, 0xfe, 0x46, 0x4d, 0x5f, 0xc4, 0xb3, 0x05, 0xa7,
-	0xb7, 0xdc, 0x8d, 0x14, 0xa1, 0x1e, 0x32, 0x49, 0xc5, 0x47, 0x45, 0xf6, 0x1b, 0x9e, 0x52, 0x1a,
-	0x62, 0xa8, 0x15, 0x2b, 0xfc, 0x59, 0xe5, 0xd7, 0xcf, 0x33, 0xc9, 0x55, 0x96, 0xaf, 0x29, 0x54,
-	0xb4, 0x91, 0x49, 0x2e, 0xa8, 0x48, 0xbb, 0x91, 0x22, 0xc2, 0x3f, 0x06, 0x70, 0xdf, 0x0e, 0xed,
-	0x7c, 0xa2, 0xd1, 0x37, 0x6e, 0x06, 0x96, 0x9b, 0x0f, 0x01, 0xf2, 0x22, 0xcb, 0x33, 0x11, 0xcf,
-	0xce, 0x27, 0x3a, 0x91, 0x2d, 0x0e, 0x26, 0xc1, 0xf3, 0x45, 0x22, 0xcf, 0x4d, 0xb8, 0x9a, 0xb2,
-	0x6a, 0xa2, 0xb9, 0xba, 0x26, 0x5a, 0x16, 0x80, 0xe1, 0x7f, 0x03, 0xd8, 0x33, 0x2e, 0x95, 0xee,
-	0x28, 0x14, 0x83, 0x12, 0xc5, 0x4a, 0x65, 0x7d, 0xb5, 0xca, 0x86, 0xfd, 0x26, 0x0f, 0x01, 0x64,
-	0x5c, 0x5c, 0x73, 0xca, 0x7f, 0x8d, 0xbc, 0xc5, 0xf1, 0x91, 0x6e, 0x2d, 0x21, 0xcd, 0xde, 0x36,
-	0xe8, 0xb5, 0xa9, 0xcd, 0x7c, 0xc3, 0x6a, 0x33, 0x2e, 0xfa, 0x1a, 0x58, 0xac, 0xd0, 0xab, 0x22,
-	0x9b, 0x93, 0xc1, 0x8e, 0xaa, 0x50, 0x43, 0x5b, 0xc5, 0xb2, 0x65, 0x17, 0x4b, 0xf8, 0xf7, 0x00,
-	0x0e, 0x22, 0x3e, 0xe6, 0x49, 0x2e, 0x8d, 0x62, 0x9d, 0x6a, 0xab, 0x5e, 0xe3, 0x1d, 0x68, 0x8f,
-	0xe9, 0x94, 0x20, 0x58, 0xf6, 0xa9, 0xca, 0xd4, 0x48, 0x0b, 0xb2, 0xef, 0x41, 0x33, 0x2f, 0xf8,
-	0x17, 0x04, 0xce, 0xf6, 0xc9, 0x03, 0xef, 0x82, 0x01, 0x3b, 0x22, 0x21, 0xf6, 0x0e, 0x74, 0xc6,
-	0x8b, 0xa2, 0xe0, 0xa9, 0xd4, 0xbd, 0x75, 0xad, 0xbc, 0x91, 0x0b, 0xff, 0x12, 0xc0, 0x1b, 0x5e,
-	0x00, 0xe8, 0x05, 0x8a, 0x7d, 0x9e, 0x4f, 0x62, 0xc9, 0x1d, 0x58, 0x02, 0x0f, 0x96, 0xb7, 0xb5,
-	0x77, 0x2a, 0x9c, 0x6f, 0xae, 0x08, 0xc7, 0xf3, 0xf0, 0x87, 0x95, 0x87, 0x8d, 0x17, 0xdf, 0x29,
-	0xbd, 0xfc, 0x4f, 0x00, 0x0f, 0x3c, 0x2f, 0xe9, 0xfd, 0xb2, 0x94, 0x2f, 0xe5, 0xd9, 0xea, 0xb6,
-	0xed, 0xe6, 0x53, 0x63, 0x29, 0x9f, 0xf0, 0x3c, 0x93, 0xf1, 0x0c, 0x55, 0x9b, 0xa4, 0xb7, 0x38,
-	0xd8, 0x15, 0x89, 0x42, 0xb3, 0x94, 0x6d, 0xad, 0xa8, 0x62, 0x50, 0x73, 0xcf, 0x84, 0xa4, 0xc3,
-	0x36, 0x1d, 0x96, 0x34, 0xeb, 0x43, 0x07, 0xf3, 0x2b, 0x12, 0x52, 0x67, 0x95, 0x21, 0xd1, 0xe6,
-	0x24, 0x4b, 0xb9, 0x0a, 0x96, 0x12, 0xab, 0x15, 0x59, 0x9c, 0xf0, 0x77, 0x01, 0xbc, 0x66, 0xc2,
-	0x3d, 0x2b, 0xb2, 0x45, 0xfe, 0x7f, 0x75, 0xb1, 0xb2, 0xc7, 0xa8, 0x62, 0xd2, 0x3d, 0xe6, 0x85,
-	0x75, 0x14, 0x7e, 0xe5, 0x7b, 0xf1, 0x4a, 0xea, 0x7b, 0x08, 0xdb, 0x15, 0xfa, 0xc6, 0x27, 0x9b,
-	0x75, 0x87, 0x0a, 0xb7, 0x33, 0xb3, 0xbd, 0xb6, 0x60, 0x3b, 0x4e, 0xc1, 0xfe, 0x23, 0x80, 0x81,
-	0x97, 0x49, 0x36, 0xb4, 0xab, 0xaa, 0xf6, 0xc4, 0xab, 0xda, 0x81, 0x97, 0xb2, 0xd6, 0xfd, 0xb2,
-	0x6c, 0x8f, 0x9d, 0xb2, 0x5d, 0x79, 0xc3, 0xa9, 0x8b, 0x1f, 0xf8, 0x95, 0xbb, 0xe9, 0x4a, 0x59,
-	0x16, 0x53, 0xb8, 0x1f, 0xf1, 0xe7, 0xe5, 0x38, 0xa6, 0x0a, 0x4f, 0xaf, 0xb2, 0xf5, 0x09, 0x92,
-	0x98, 0x19, 0x60, 0x8f, 0xb5, 0x86, 0x15, 0xeb, 0x9a, 0xbe, 0x1f, 0x9e, 0xc2, 0x61, 0xc4, 0x45,
-	0xee, 0x98, 0x52, 0xcf, 0xf4, 0x1d, 0x68, 0x24, 0x13, 0x35, 0xb8, 0x36, 0xf4, 0x1b, 0x94, 0x09,
-	0xcf, 0xb0, 0x88, 0x3d, 0x25, 0x14, 0x97, 0x60, 0x8f, 0x6c, 0x2d, 0x9b, 0x62, 0x27, 0x45, 0x7f,
-	0x08, 0x60, 0x1f, 0x0f, 0x69, 0xde, 0x9f, 0x3c, 0x8d, 0x93, 0xf4, 0x69, 0x9c, 0x5b, 0x4f, 0x1e,
-	0xac, 0x5f, 0x68, 0x54, 0xf8, 0x15, 0xc3, 0xdb, 0xdb, 0x1a, 0x1b, 0xf7, 0xb6, 0xa6, 0xbb, 0xb7,
-	0x85, 0x1f, 0xa8, 0x61, 0x5e, 0xb9, 0x41, 0xe8, 0x1f, 0x43, 0x2b, 0x91, 0x7c, 0x6e, 0xa2, 0xe9,
-	0x5b, 0xd1, 0x38, 0x0e, 0x47, 0x4a, 0x2c, 0xfc, 0x57, 0x43, 0x15, 0x58, 0x89, 0x89, 0x2e, 0xb0,
-	0xb7, 0x60, 0x17, 0x2d, 0x55, 0xcb, 0x4e, 0x40, 0xcb, 0x98, 0xcb, 0xc4, 0xcd, 0xb0, 0x62, 0xd8,
-	0x1b, 0x96, 0xcf, 0x5e, 0x53, 0x88, 0x15, 0x6a, 0x4d, 0x07, 0xb5, 0x10, 0x76, 0xf2, 0x82, 0x57,
-	0xc6, 0x5b, 0x64, 0xdc, 0xe1, 0xb9, 0xc8, 0xb6, 0xbd, 0x55, 0x51, 0x6b, 0xc0, 0x60, 0xb8, 0x5e,
-	0x58, 0x8d, 0x86, 0x92, 0x87, 0x1a, 0x44, 0x29, 0xb0, 0xa5, 0x34, 0x94, 0x0c, 0xc4, 0x5e, 0xde,
-	0x9c, 0x66, 0x8b, 0x54, 0x8a, 0x7e, 0x97, 0x1a, 0x5b, 0x49, 0xab, 0xb3, 0x88, 0x8b, 0xc5, 0x4c,
-	0xf6, 0x41, 0xad, 0xfb, 0x86, 0xc6, 0x96, 0x2b, 0x6f, 0x50, 0x83, 0xe8, 0x6f, 0xd3, 0xf7, 0x8d,
-	0x21, 0x69, 0xd3, 0x44, 0x98, 0x2f, 0xcd, 0xd5, 0x1d, 0x85, 0xa9, 0xc3, 0x44, 0xcf, 0x35, 0x43,
-	0x29, 0xd9, 0x25, 0x25, 0x0e, 0x8f, 0x3d, 0x82, 0xfd, 0x34, 0x4b, 0x4f, 0x69, 0xfb, 0xbe, 0x34,
-	0x4e, 0xf6, 0xc8, 0xc9, 0xe5, 0x83, 0xf0, 0x63, 0xeb, 0xa3, 0x4a, 0x1d, 0x3d, 0xa1, 0x4f, 0x3e,
-	0x6c, 0x2e, 0xd6, 0xc7, 0x87, 0x9b, 0xfb, 0x5e, 0x42, 0x94, 0xc5, 0x28, 0xd5, 0x02, 0x48, 0xc7,
-	0x4f, 0x93, 0x94, 0x17, 0x2f, 0xaf, 0x0b, 0xd3, 0x27, 0x11, 0x17, 0x7c, 0x76, 0x55, 0xee, 0xf2,
-	0x94, 0x3e, 0x5b, 0x91, 0xcf, 0x0e, 0xbf, 0x6a, 0x5a, 0x5f, 0x16, 0xda, 0xe2, 0xbb, 0xd8, 0x1a,
-	0x31, 0x1a, 0x6d, 0xf1, 0x75, 0xdf, 0xa2, 0x1d, 0xeb, 0xa8, 0x16, 0x69, 0x69, 0xf6, 0x18, 0x5a,
-	0x73, 0x74, 0x7c, 0xc5, 0x12, 0xe0, 0x47, 0x35, 0xaa, 0x45, 0x4a, 0x96, 0xfd, 0x04, 0x76, 0x63,
-	0x21, 0xb8, 0xbc, 0xc4, 0x2f, 0xe6, 0x2b, 0x5e, 0xe8, 0x4e, 0x79, 0xa0, 0x2f, 0x3f, 0xc1, 0x33,
-	0x61, 0x0e, 0x47, 0xb5, 0xc8, 0x95, 0x2e, 0xaf, 0xff, 0x22, 0x91, 0xd3, 0x49, 0x11, 0x7f, 0x49,
-	0x19, 0xed, 0x5f, 0x37, 0x87, 0xe5, 0x75, 0xc3, 0x60, 0x8f, 0x61, 0x4b, 0x1a, 0xc3, 0xed, 0xcd,
-	0x86, 0x4b, 0x41, 0xbc, 0xf4, 0xa5, 0x31, 0xd7, 0xd9, 0x6c, 0xae, 0x14, 0x64, 0x1f, 0x42, 0xcf,
-	0x28, 0xb8, 0xcc, 0x3e, 0xbc, 0xe1, 0x63, 0x2a, 0x8c, 0x0a, 0x25, 0xd7, 0x9e, 0x12, 0x19, 0xd5,
-	0x22, 0xef, 0x12, 0x7b, 0x0f, 0x20, 0x2d, 0xd7, 0x51, 0x2a, 0x9f, 0x4d, 0x0b, 0xe7, 0xa8, 0x16,
-	0x59, 0xe2, 0xec, 0x23, 0xb8, 0x97, 0xba, 0xa3, 0x8d, 0x8a, 0x6c, 0xe3, 0xf0, 0x1b, 0xd5, 0x22,
-	0xff, 0x12, 0xce, 0x1c, 0x79, 0xab, 0x17, 0x82, 0xba, 0xbc, 0x7d, 0xbf, 0xa3, 0x3f, 0x9b, 0x70,
-	0x0e, 0x1f, 0x5a, 0x73, 0xd8, 0x4a, 0x96, 0x75, 0x33, 0xd8, 0x5a, 0x2e, 0xee, 0x96, 0xda, 0xdf,
-	0x77, 0x66, 0xf0, 0x52, 0x6a, 0x3a, 0x3f, 0x03, 0xa8, 0x29, 0xfc, 0xae, 0x3f, 0x85, 0x37, 0x5f,
-	0x2a, 0xe7, 0xf0, 0xc7, 0xce, 0x47, 0x40, 0x95, 0xc1, 0x2f, 0x55, 0xdd, 0xbf, 0xaf, 0xe3, 0x54,
-	0x77, 0xb5, 0xd1, 0xa2, 0xeb, 0xae, 0xa8, 0xc1, 0xd2, 0x8a, 0x8a, 0x2b, 0x15, 0x52, 0x0a, 0x46,
-	0x0d, 0xba, 0xcd, 0x62, 0xdf, 0x86, 0x1e, 0xae, 0xa5, 0x17, 0xf1, 0x9c, 0x6b, 0xa1, 0x06, 0x09,
-	0x79, 0xdc, 0x6a, 0x52, 0x34, 0x57, 0x4f, 0x8a, 0x96, 0x3f, 0x5f, 0xab, 0x1e, 0xde, 0xde, 0xd4,
-	0xc3, 0x3b, 0x1b, 0x7a, 0xf8, 0x96, 0xdb, 0xc3, 0xc3, 0x5f, 0x2d, 0xe7, 0x47, 0xc4, 0xc7, 0x59,
-	0x31, 0x79, 0x55, 0xf9, 0x11, 0x7e, 0x0b, 0xb6, 0xcb, 0xe3, 0xcb, 0x1b, 0x0c, 0x4f, 0x4d, 0x09,
-	0xad, 0x58, 0x53, 0x6a, 0x6b, 0xa9, 0x96, 0xac, 0x4b, 0xc4, 0xc2, 0x9f, 0xa8, 0x77, 0xf9, 0x61,
-	0x25, 0xfc, 0x6d, 0x1d, 0xf6, 0x9d, 0xfd, 0xe7, 0xeb, 0xf5, 0xaa, 0xdd, 0x97, 0x7d, 0xd5, 0xae,
-	0xf5, 0xaa, 0x67, 0xf0, 0x9a, 0x03, 0x01, 0xa1, 0x89, 0xa5, 0xda, 0x26, 0x6f, 0xfc, 0x9d, 0x69,
-	0x09, 0xae, 0x48, 0xcb, 0xa9, 0x92, 0xf3, 0x5f, 0x05, 0x3d, 0x5b, 0xfd, 0x26, 0x4b, 0x3b, 0xa0,
-	0xf3, 0xa3, 0xd6, 0xdf, 0xea, 0xd0, 0xab, 0x46, 0x1b, 0xb6, 0x57, 0x4c, 0x32, 0xfc, 0x96, 0x30,
-	0x49, 0x86, 0x7f, 0x53, 0x33, 0xcb, 0xcc, 0x02, 0x2d, 0x33, 0x7c, 0xba, 0xa4, 0x6c, 0xe1, 0x04,
-	0xfa, 0x56, 0x64, 0x71, 0xac, 0x8c, 0x6a, 0x92, 0x45, 0x4d, 0x21, 0x3f, 0x9e, 0x23, 0x56, 0x06,
-	0x72, 0x45, 0xa1, 0x4d, 0x8e, 0xed, 0x5e, 0xa1, 0x4d, 0x7f, 0xd3, 0x42, 0x7e, 0x3b, 0x7f, 0x96,
-	0xcd, 0xf4, 0xc7, 0xa3, 0xa6, 0xac, 0x67, 0x03, 0xe7, 0xd9, 0xe8, 0x47, 0x32, 0x7c, 0x6e, 0x44,
-	0x4b, 0xef, 0x83, 0x07, 0x24, 0xb1, 0xc4, 0xa7, 0x1f, 0x87, 0xe2, 0x22, 0xd6, 0x52, 0x87, 0x6a,
-	0xf5, 0xad, 0x38, 0xb8, 0x46, 0x89, 0xc5, 0x78, 0xcc, 0x85, 0xe8, 0x3f, 0xa0, 0xe0, 0x0c, 0x79,
-	0xf2, 0xe7, 0x06, 0x74, 0xcb, 0x1f, 0xb4, 0xd9, 0x4f, 0x61, 0xeb, 0x8c, 0x4b, 0x7a, 0x02, 0xb6,
-	0x57, 0xbe, 0xdc, 0xf3, 0x0b, 0x59, 0x24, 0xe9, 0xf5, 0xe0, 0xcd, 0xe5, 0x9d, 0xc0, 0xf9, 0xd5,
-	0x30, 0xac, 0xb1, 0x1f, 0x03, 0x7c, 0x92, 0x08, 0xa9, 0x93, 0x61, 0xb7, 0x52, 0xf1, 0x69, 0x32,
-	0x1b, 0x0c, 0x56, 0xe5, 0x82, 0x12, 0x0d, 0x6b, 0xec, 0x33, 0x60, 0x67, 0x9c, 0x82, 0xb2, 0x0b,
-	0xf3, 0x61, 0xa5, 0x62, 0x55, 0xe1, 0x0e, 0xd6, 0xe6, 0x57, 0x58, 0x63, 0x17, 0xd0, 0x33, 0xd1,
-	0xdc, 0x51, 0xdb, 0x9b, 0x1b, 0xa7, 0x84, 0xc8, 0xc3, 0x1a, 0x7b, 0x0f, 0xf6, 0xce, 0xb8, 0xa4,
-	0xd4, 0x2a, 0xb7, 0xcc, 0x5e, 0xa5, 0x16, 0xd3, 0x62, 0x70, 0xe0, 0xab, 0x21, 0xf1, 0xb0, 0xc6,
-	0x1e, 0x41, 0xfb, 0x5c, 0x5c, 0xdc, 0xa6, 0x63, 0x1f, 0x9a, 0x7d, 0x4d, 0x9e, 0x8b, 0xd3, 0x78,
-	0x71, 0x3d, 0x95, 0x9f, 0xe7, 0x61, 0xed, 0x59, 0x9b, 0xfe, 0x2b, 0xf0, 0xf8, 0x7f, 0x01, 0x00,
-	0x00, 0xff, 0xff, 0xed, 0xd7, 0xdd, 0x61, 0x72, 0x18, 0x00, 0x00,
+	proto.RegisterType((*ParaLocalDbBlock)(nil), "types.ParaLocalDbBlock")
+	proto.RegisterType((*ParaLocalDbBlockInfo)(nil), "types.ParaLocalDbBlockInfo")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -2972,4 +3921,159 @@ var _Paracross_serviceDesc = grpc.ServiceDesc{
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "paracross.proto",
+}
+
+func init() { proto.RegisterFile("paracross.proto", fileDescriptor_paracross_e0081cf2748ff01a) }
+
+var fileDescriptor_paracross_e0081cf2748ff01a = []byte{
+	// 2376 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5a, 0x4f, 0x73, 0x1c, 0x47,
+	0x15, 0xdf, 0xd9, 0xbf, 0xda, 0x27, 0xed, 0x5a, 0x9a, 0xc8, 0xca, 0xb2, 0x76, 0x1c, 0x55, 0x97,
+	0x49, 0x09, 0xe2, 0xd8, 0x58, 0x06, 0x53, 0xa9, 0x14, 0x05, 0xb6, 0x1c, 0x6b, 0x55, 0xb1, 0x53,
+	0xc9, 0x48, 0x81, 0x03, 0x17, 0x46, 0xbb, 0x6d, 0x69, 0x8a, 0xdd, 0x99, 0xf5, 0x4c, 0x6f, 0x22,
+	0x71, 0xa1, 0x28, 0xe0, 0x0c, 0x27, 0xaa, 0xc2, 0x81, 0x0b, 0x9c, 0xf9, 0x08, 0x1c, 0x38, 0x86,
+	0x53, 0x38, 0x70, 0xe0, 0xc6, 0x8d, 0x3b, 0x07, 0xae, 0xd4, 0x7b, 0xdd, 0x3d, 0xd3, 0xdd, 0x3b,
+	0xbb, 0x92, 0x1d, 0x5f, 0xb8, 0x6d, 0xbf, 0x7e, 0xfd, 0xfa, 0xbd, 0x5f, 0xbf, 0xf7, 0xfa, 0xbd,
+	0x9e, 0x85, 0x2b, 0xd3, 0x30, 0x0d, 0x87, 0x69, 0x92, 0x65, 0xb7, 0xa7, 0x69, 0x22, 0x12, 0xbf,
+	0x21, 0xce, 0xa7, 0x3c, 0xeb, 0x6f, 0x88, 0x34, 0x8c, 0xb3, 0x70, 0x28, 0xa2, 0x24, 0x96, 0x33,
+	0xfd, 0xb5, 0x61, 0x32, 0x99, 0xe4, 0xa3, 0xf5, 0xe3, 0x71, 0x32, 0xfc, 0xe9, 0xf0, 0x34, 0x8c,
+	0x14, 0x85, 0x3d, 0x81, 0xad, 0x8f, 0xb4, 0xb0, 0x43, 0x11, 0x8a, 0x59, 0xf6, 0x88, 0x8b, 0x30,
+	0x1a, 0x67, 0xfe, 0x26, 0x34, 0xc2, 0xd1, 0x28, 0xcd, 0x7a, 0xde, 0x76, 0x6d, 0xa7, 0x1d, 0xc8,
+	0x81, 0x7f, 0x1d, 0xda, 0x24, 0x63, 0x10, 0x66, 0xa7, 0xbd, 0xea, 0x76, 0x6d, 0x67, 0x2d, 0x28,
+	0x08, 0xec, 0xc7, 0x70, 0xcd, 0x91, 0xf6, 0x10, 0xe7, 0xb4, 0xc8, 0x1b, 0x00, 0x39, 0xaf, 0x94,
+	0xbb, 0x16, 0x18, 0x14, 0x14, 0x2e, 0xce, 0x02, 0x9e, 0xcd, 0xc6, 0x22, 0xd3, 0xc2, 0x73, 0x02,
+	0xfb, 0x7d, 0x15, 0xae, 0xe6, 0xd2, 0x07, 0x3c, 0x3a, 0x39, 0x15, 0x72, 0x0f, 0x7f, 0x0b, 0x9a,
+	0x19, 0xfd, 0xea, 0x79, 0xdb, 0xde, 0x4e, 0x23, 0x50, 0x23, 0x34, 0x41, 0x44, 0x62, 0xcc, 0x7b,
+	0xd5, 0x6d, 0x0f, 0x4d, 0xa0, 0x01, 0x72, 0x9f, 0xd2, 0xea, 0x5e, 0x6d, 0xdb, 0xdb, 0xa9, 0x05,
+	0x6a, 0xe4, 0x7f, 0x17, 0x5a, 0x23, 0xa9, 0x68, 0xaf, 0xbe, 0xed, 0xed, 0xac, 0xee, 0xbe, 0x71,
+	0x9b, 0x60, 0xbd, 0x5d, 0x0e, 0x50, 0xa0, 0xb9, 0xd1, 0xac, 0x49, 0x18, 0xc5, 0x52, 0xa5, 0x5e,
+	0x83, 0x84, 0x1a, 0x14, 0xbf, 0x0f, 0x2b, 0x34, 0x42, 0xc8, 0x9a, 0xdb, 0xde, 0xce, 0x5a, 0x90,
+	0x8f, 0xfd, 0xc7, 0xb0, 0x76, 0x6c, 0x40, 0xd4, 0x6b, 0xd1, 0xce, 0xac, 0x7c, 0x67, 0x13, 0xcc,
+	0xc0, 0x5a, 0xc7, 0xfe, 0xed, 0x41, 0xaf, 0x14, 0x9c, 0x20, 0x9b, 0xbe, 0x22, 0x7c, 0x6c, 0x33,
+	0xeb, 0x4b, 0xcd, 0x6c, 0x90, 0xc0, 0xc2, 0xcc, 0x6d, 0x58, 0x45, 0x47, 0x8c, 0xc4, 0x03, 0x72,
+	0xa9, 0x26, 0xb9, 0x94, 0x49, 0xf2, 0x77, 0xe0, 0x8a, 0x1c, 0x3e, 0xcc, 0xdd, 0xab, 0x45, 0x5c,
+	0x2e, 0x99, 0x7d, 0xee, 0xc1, 0x15, 0x07, 0x98, 0xc2, 0x12, 0xaf, 0xdc, 0x92, 0xaa, 0x65, 0x89,
+	0xe5, 0xc4, 0x35, 0x3a, 0x91, 0x82, 0xf0, 0xc2, 0x76, 0x1a, 0xc7, 0xc9, 0xfe, 0x64, 0x1e, 0xc3,
+	0x5e, 0x12, 0x67, 0x3c, 0xce, 0x66, 0xcb, 0x95, 0x44, 0x68, 0x4e, 0x8b, 0xfd, 0xa4, 0xa6, 0x26,
+	0xc9, 0xbf, 0x09, 0x9d, 0xa1, 0x14, 0x35, 0x30, 0xcf, 0xc5, 0x26, 0xfa, 0xdf, 0x84, 0x75, 0x45,
+	0x28, 0x10, 0xac, 0xd3, 0x46, 0x73, 0x74, 0xf6, 0x3b, 0x0f, 0x7c, 0x54, 0xf3, 0xc3, 0x64, 0xc4,
+	0x11, 0xfe, 0xbd, 0x24, 0x7e, 0x16, 0x9d, 0x2c, 0x50, 0xb0, 0x0b, 0xd5, 0x64, 0x4a, 0x7a, 0x75,
+	0x82, 0x6a, 0x32, 0xc5, 0x71, 0x34, 0x22, 0x1d, 0xda, 0x41, 0x35, 0x1a, 0xf9, 0x3e, 0xd4, 0x31,
+	0x37, 0xa8, 0xcd, 0xe8, 0x37, 0x4a, 0xfa, 0x34, 0x1c, 0xcf, 0x38, 0x01, 0xd4, 0x09, 0xe4, 0x40,
+	0x7a, 0x41, 0x14, 0x67, 0x8f, 0xd3, 0xe4, 0x67, 0x3c, 0xa6, 0x58, 0x40, 0x53, 0x0b, 0x12, 0xfb,
+	0x41, 0xa1, 0xd7, 0x0f, 0x13, 0xc1, 0xa5, 0x77, 0x2f, 0x48, 0x45, 0xb8, 0x47, 0x22, 0xb8, 0xcc,
+	0x14, 0xed, 0x40, 0x0e, 0xd8, 0x6f, 0x3d, 0xd8, 0x34, 0x4d, 0x3b, 0x18, 0x29, 0xf4, 0xb5, 0x9a,
+	0x9e, 0xa1, 0xe6, 0x0d, 0x80, 0x69, 0x9a, 0x4c, 0x93, 0x2c, 0x1c, 0x1f, 0x8c, 0x54, 0x14, 0x18,
+	0x14, 0x74, 0xa0, 0xe7, 0xb3, 0x48, 0x1c, 0x68, 0x73, 0xd5, 0xc8, 0x08, 0xa8, 0x7a, 0x79, 0x40,
+	0x35, 0x0c, 0x00, 0xd9, 0x7f, 0x3d, 0x58, 0xd7, 0x2a, 0xe5, 0xea, 0x48, 0x14, 0xbd, 0x1c, 0xc5,
+	0x42, 0x64, 0xb5, 0x5c, 0x64, 0xcd, 0x3c, 0x93, 0x1b, 0x00, 0x22, 0x4c, 0x4f, 0x38, 0x05, 0x8f,
+	0x42, 0xde, 0xa0, 0xb8, 0x48, 0x37, 0xe6, 0x90, 0xf6, 0xef, 0x68, 0xf4, 0x9a, 0x94, 0x71, 0xbe,
+	0x66, 0x64, 0x1c, 0x1b, 0x7d, 0x05, 0x2c, 0xba, 0xfd, 0xb3, 0x34, 0x99, 0xd0, 0x86, 0x2d, 0x19,
+	0xde, 0x7a, 0x6c, 0x04, 0xda, 0x8a, 0x19, 0x68, 0xec, 0x2f, 0x1e, 0x5c, 0x0d, 0xf8, 0x90, 0x47,
+	0x53, 0xa1, 0x05, 0x2b, 0x57, 0x2b, 0x3b, 0x8d, 0xbb, 0xd0, 0x1c, 0xd2, 0x2c, 0x41, 0x30, 0xaf,
+	0x53, 0xe1, 0xa9, 0x81, 0x62, 0xf4, 0xdf, 0x86, 0xfa, 0x34, 0xe5, 0x9f, 0x12, 0x38, 0xab, 0xbb,
+	0xaf, 0x3b, 0x0b, 0x34, 0xd8, 0x01, 0x31, 0xf9, 0x77, 0xa1, 0x35, 0x9c, 0xa5, 0x29, 0x8f, 0x85,
+	0x4a, 0xf0, 0x0b, 0xf9, 0x35, 0x1f, 0xfb, 0xa3, 0x07, 0x6f, 0x38, 0x06, 0xa0, 0x16, 0xc8, 0xf6,
+	0xc9, 0x74, 0x14, 0x0a, 0x6e, 0xc1, 0xe2, 0x39, 0xb0, 0xdc, 0x51, 0xda, 0x49, 0x73, 0xae, 0x95,
+	0x98, 0xe3, 0x68, 0xf8, 0x9d, 0x42, 0xc3, 0xda, 0xc5, 0x6b, 0x72, 0x2d, 0xff, 0xe3, 0xc1, 0xeb,
+	0x8e, 0x96, 0x74, 0x7e, 0x49, 0xcc, 0xe7, 0xfc, 0xac, 0x3c, 0xe7, 0xdb, 0xfe, 0x54, 0x9b, 0xf3,
+	0x27, 0x9c, 0x4f, 0x44, 0x38, 0x46, 0xd1, 0xda, 0xe9, 0x0d, 0x0a, 0xdd, 0xdc, 0x38, 0xc2, 0x6d,
+	0xc9, 0xdb, 0x1a, 0x41, 0x41, 0xa0, 0x8c, 0x99, 0x64, 0x82, 0x26, 0x9b, 0x34, 0x99, 0x8f, 0xfd,
+	0x1e, 0xb4, 0xd0, 0xbf, 0x82, 0x4c, 0x28, 0xaf, 0xd2, 0x43, 0xdc, 0x73, 0x94, 0xc4, 0x5c, 0x1a,
+	0x4b, 0x8e, 0xd5, 0x08, 0x0c, 0x0a, 0xfb, 0xa5, 0x07, 0xaf, 0x69, 0x73, 0xf7, 0xd3, 0x64, 0x36,
+	0xfd, 0x4a, 0x59, 0x2c, 0xcf, 0x31, 0x32, 0x98, 0x54, 0x8e, 0xb9, 0x30, 0x8e, 0xd8, 0xdf, 0x5c,
+	0x2d, 0x5e, 0x49, 0x7c, 0x6f, 0xc3, 0x6a, 0x81, 0xbe, 0xd6, 0xc9, 0x24, 0x5d, 0x22, 0xc2, 0x4d,
+	0xcf, 0x6c, 0x2e, 0x0c, 0xd8, 0x96, 0x15, 0xb0, 0x5f, 0x78, 0xd0, 0x77, 0x3c, 0xc9, 0x84, 0xb6,
+	0x2c, 0x6a, 0x77, 0x9d, 0xa8, 0xed, 0x3b, 0x2e, 0x6b, 0xac, 0xcf, 0xc3, 0xf6, 0xb6, 0x15, 0xb6,
+	0xa5, 0x2b, 0xac, 0xb8, 0xf8, 0xb6, 0x1b, 0xb9, 0xcb, 0x96, 0xe4, 0x61, 0x71, 0x0a, 0x9b, 0x01,
+	0x7f, 0x9e, 0x5f, 0xc7, 0x14, 0xe1, 0xf1, 0xb3, 0x64, 0xb1, 0x83, 0x44, 0xfa, 0x0e, 0x30, 0xaf,
+	0xb5, 0x9a, 0x61, 0xeb, 0x82, 0xbc, 0xcf, 0xf6, 0x60, 0x2b, 0xe0, 0xd9, 0xd4, 0xda, 0x4a, 0x1e,
+	0xd3, 0x37, 0xa0, 0x16, 0x8d, 0xe4, 0xc5, 0xb5, 0x24, 0xdf, 0x20, 0x0f, 0xdb, 0xc7, 0x20, 0x76,
+	0x84, 0x90, 0x5d, 0x99, 0x7f, 0xcb, 0x94, 0xb2, 0xcc, 0x76, 0x12, 0xf4, 0x6b, 0x0f, 0x36, 0x70,
+	0x92, 0xee, 0xfb, 0xdd, 0xa7, 0x61, 0x14, 0x3f, 0x0d, 0xa7, 0xc6, 0x91, 0x7b, 0x8b, 0x8b, 0x21,
+	0x69, 0xfe, 0xc2, 0x62, 0xa8, 0xb6, 0xb4, 0x18, 0xaa, 0xdb, 0x45, 0x1f, 0x7b, 0x24, 0x2f, 0xf3,
+	0x42, 0x0d, 0x42, 0xff, 0x36, 0x34, 0x22, 0xc1, 0x27, 0xda, 0x9a, 0x9e, 0x61, 0x8d, 0xa5, 0x70,
+	0x20, 0xd9, 0xd8, 0xbf, 0x6a, 0x32, 0xc0, 0x72, 0x4c, 0x54, 0x80, 0xdd, 0x84, 0x0e, 0xee, 0x54,
+	0x14, 0x3b, 0x1e, 0xd5, 0x62, 0x36, 0x11, 0xcb, 0xca, 0x82, 0x60, 0x56, 0x58, 0x2e, 0x79, 0x41,
+	0x20, 0x16, 0xa8, 0xd5, 0x2d, 0xd4, 0x18, 0xac, 0x4d, 0x53, 0x5e, 0x6c, 0x2e, 0x0b, 0x41, 0x8b,
+	0x66, 0x23, 0xdb, 0x74, 0xcb, 0x4c, 0x29, 0x01, 0x8d, 0xe1, 0xaa, 0xda, 0xd5, 0x12, 0x72, 0x1a,
+	0x4a, 0xc8, 0x72, 0x86, 0x15, 0x29, 0x21, 0x27, 0x20, 0xf6, 0xe2, 0x6c, 0x2f, 0x99, 0xc5, 0x22,
+	0xeb, 0xb5, 0x29, 0xb1, 0xe5, 0x63, 0x39, 0x27, 0x3b, 0xa7, 0x1e, 0xc8, 0x22, 0x55, 0x8f, 0x31,
+	0xe5, 0x8a, 0x33, 0xd9, 0x83, 0xad, 0x52, 0x93, 0xa5, 0x87, 0x54, 0x69, 0x22, 0xcc, 0x47, 0x7a,
+	0xe9, 0x9a, 0xc4, 0xd4, 0x22, 0xa2, 0xe6, 0x8a, 0x20, 0x85, 0x74, 0x48, 0x88, 0x45, 0xf3, 0x6f,
+	0xc1, 0x46, 0x9c, 0xc4, 0x7b, 0x54, 0xba, 0x1f, 0x69, 0x25, 0xbb, 0xa4, 0xe4, 0xfc, 0x04, 0x7b,
+	0x08, 0x1b, 0x87, 0x7c, 0xfc, 0x4c, 0x15, 0xcc, 0x87, 0x22, 0x3c, 0xe1, 0x99, 0xff, 0x8e, 0xed,
+	0x28, 0x3a, 0x78, 0x5c, 0x46, 0xed, 0x27, 0x4f, 0x60, 0xdd, 0x9d, 0xc2, 0x24, 0x99, 0x89, 0x30,
+	0x15, 0x03, 0xd3, 0xf1, 0x4d, 0x12, 0x9e, 0x2f, 0x8f, 0xc3, 0x63, 0x75, 0x1f, 0x76, 0x02, 0x35,
+	0x62, 0xff, 0xf4, 0x60, 0xd3, 0x15, 0x47, 0xee, 0xbb, 0x3c, 0xaf, 0x77, 0xf2, 0xbc, 0xfe, 0x0e,
+	0x34, 0x32, 0x5c, 0xe4, 0x94, 0x26, 0xf3, 0xda, 0x13, 0x97, 0x95, 0xac, 0xeb, 0x4e, 0xb2, 0xbe,
+	0x01, 0xc0, 0xcf, 0xf8, 0xd0, 0xee, 0x2f, 0x0b, 0xca, 0x0b, 0x97, 0x72, 0x8c, 0xc3, 0xd6, 0x93,
+	0x64, 0x18, 0x8e, 0xb5, 0x32, 0x85, 0x75, 0x77, 0xb5, 0xd6, 0x9e, 0x55, 0x7e, 0x94, 0x21, 0xa1,
+	0x35, 0x27, 0x6f, 0x3a, 0x88, 0x47, 0xfc, 0x4c, 0x65, 0x0f, 0x3d, 0x64, 0xf7, 0xa1, 0x2b, 0xf3,
+	0x3e, 0x6a, 0x50, 0x0a, 0x5e, 0xde, 0x26, 0x54, 0x8d, 0x36, 0x81, 0x31, 0x58, 0x97, 0xeb, 0xf6,
+	0xc2, 0x78, 0xc8, 0xc7, 0x65, 0x2b, 0xd9, 0x97, 0xaa, 0x09, 0x24, 0x75, 0x5e, 0xe8, 0xe2, 0xbf,
+	0xa3, 0x4d, 0x84, 0xa5, 0x07, 0x33, 0xa8, 0x68, 0x03, 0xdf, 0x86, 0x3a, 0xc2, 0xd6, 0x5b, 0x25,
+	0xfe, 0xab, 0x8a, 0xdf, 0xb6, 0x6c, 0x50, 0x09, 0x88, 0x89, 0x6a, 0x58, 0xd2, 0x9a, 0x42, 0xa7,
+	0x10, 0xef, 0x1a, 0x34, 0xa8, 0x04, 0x8a, 0xf1, 0x61, 0x4b, 0x81, 0xc0, 0x7e, 0x55, 0x5c, 0xbe,
+	0xd6, 0xc9, 0x28, 0xf3, 0x74, 0x35, 0x79, 0x89, 0xa3, 0x99, 0xab, 0x26, 0xab, 0x17, 0xaf, 0xc9,
+	0xaf, 0xcd, 0x2f, 0x3d, 0xb8, 0x5e, 0xa6, 0xc6, 0xc2, 0x92, 0x32, 0x77, 0xf5, 0xea, 0xa5, 0x5c,
+	0xdd, 0xae, 0x25, 0x6b, 0xcb, 0x6b, 0xc9, 0xfa, 0xb2, 0x5a, 0xb2, 0xb1, 0xb8, 0x96, 0x6c, 0x5a,
+	0xb5, 0x24, 0xfb, 0x39, 0x5c, 0x2b, 0x33, 0x29, 0x53, 0x45, 0xfc, 0x2d, 0x0b, 0xda, 0xde, 0x02,
+	0x03, 0x74, 0x35, 0xb2, 0xeb, 0xe2, 0xba, 0x78, 0x41, 0x0e, 0xea, 0x1f, 0x3c, 0xf0, 0x03, 0xfe,
+	0xfc, 0xe3, 0x19, 0x4f, 0xcf, 0x91, 0x4d, 0xe5, 0x38, 0xfb, 0x65, 0xa6, 0xc8, 0x1e, 0x6e, 0x31,
+	0xb2, 0x09, 0x8d, 0x21, 0xa6, 0x4a, 0x05, 0x97, 0x1c, 0x20, 0x52, 0xa3, 0x28, 0xe5, 0xf4, 0xde,
+	0xa7, 0x91, 0xca, 0x09, 0xc6, 0xd5, 0xd5, 0xb0, 0xae, 0xae, 0x4d, 0x68, 0x44, 0x14, 0xae, 0xb2,
+	0x14, 0x97, 0x03, 0xf6, 0x31, 0x16, 0x4b, 0xd3, 0xf1, 0xb9, 0xab, 0xe1, 0xbb, 0x74, 0x05, 0x49,
+	0x1f, 0x51, 0x99, 0x78, 0xa9, 0x1b, 0x15, 0xdc, 0xec, 0x03, 0xe3, 0xbd, 0x4e, 0x26, 0xfc, 0x07,
+	0x52, 0xb3, 0x5d, 0xcb, 0x6a, 0xbb, 0xa2, 0x71, 0xae, 0xf9, 0xbc, 0xc4, 0x12, 0xb2, 0xad, 0xa7,
+	0xe9, 0xa7, 0x51, 0xcc, 0xd3, 0x97, 0x97, 0x85, 0x45, 0x41, 0x94, 0x19, 0xda, 0xab, 0xe4, 0xbd,
+	0x12, 0xb8, 0x64, 0xf6, 0x9b, 0x86, 0xf1, 0xd6, 0xa4, 0x76, 0xbc, 0x8f, 0x05, 0x2f, 0x5a, 0xa3,
+	0x76, 0xbc, 0xee, 0xee, 0x68, 0xda, 0x4a, 0x71, 0x4e, 0x63, 0xff, 0x1e, 0x34, 0x26, 0xa8, 0x78,
+	0x49, 0x6b, 0xe7, 0x5a, 0x85, 0xc9, 0x87, 0x78, 0xfd, 0xef, 0x41, 0x27, 0xcc, 0x32, 0x2e, 0x8e,
+	0xd2, 0x30, 0xce, 0x9e, 0xf1, 0x54, 0xd5, 0xbf, 0x3a, 0x0b, 0x3d, 0xc0, 0xb9, 0x4c, 0x4f, 0x0e,
+	0x2a, 0x81, 0xcd, 0x9d, 0x2f, 0xff, 0x51, 0x24, 0x4e, 0x47, 0x69, 0xf8, 0x19, 0xb9, 0x82, 0xbb,
+	0x5c, 0x4f, 0xe6, 0xcb, 0x35, 0xc1, 0xbf, 0x07, 0x2b, 0x42, 0x6f, 0xdc, 0x5c, 0xbe, 0x71, 0xce,
+	0x88, 0x8b, 0x3e, 0xd3, 0xdb, 0xb5, 0x96, 0x6f, 0x97, 0x33, 0xfa, 0xef, 0x43, 0x57, 0x0b, 0x38,
+	0x4a, 0xde, 0x3f, 0xe3, 0x43, 0x2a, 0x77, 0x0a, 0x94, 0xec, 0xfd, 0x24, 0xcb, 0xa0, 0x12, 0x38,
+	0x8b, 0xfc, 0xf7, 0x00, 0xe2, 0xfc, 0x91, 0x81, 0x8a, 0xa2, 0x65, 0xcf, 0x08, 0x83, 0x4a, 0x60,
+	0xb0, 0xfb, 0x8f, 0xe1, 0x4a, 0x6c, 0x37, 0x2c, 0xea, 0x8e, 0x58, 0xd2, 0xd2, 0x0c, 0x2a, 0x81,
+	0xbb, 0xc8, 0x7f, 0x08, 0x57, 0x32, 0x1d, 0x40, 0x4a, 0x8e, 0xbc, 0x3b, 0xb6, 0x0c, 0x39, 0xc6,
+	0x2c, 0xca, 0x70, 0x16, 0x60, 0x02, 0x10, 0xe7, 0xaa, 0x55, 0xac, 0x8a, 0xf3, 0xe2, 0x92, 0xf8,
+	0xc2, 0xc3, 0x5e, 0x23, 0xef, 0xd0, 0x0c, 0x87, 0x5b, 0xd4, 0x9d, 0x19, 0xe5, 0xc9, 0xe5, 0xc2,
+	0xe3, 0x5b, 0x56, 0x77, 0x36, 0xe7, 0xde, 0xd6, 0xeb, 0xb2, 0xcc, 0x88, 0xf7, 0xdd, 0xfe, 0x6c,
+	0xf9, 0xa2, 0x3c, 0x2b, 0x7e, 0x60, 0x3d, 0x0f, 0x15, 0x51, 0xf0, 0x52, 0x19, 0xe2, 0x1f, 0x35,
+	0x4c, 0x61, 0xb6, 0x34, 0xba, 0xaf, 0xec, 0x0b, 0xc7, 0x9b, 0xbb, 0x70, 0xb0, 0xd9, 0xc6, 0x91,
+	0x84, 0x51, 0x81, 0x6e, 0x92, 0xfc, 0xb7, 0xa0, 0x8b, 0x97, 0xcc, 0x61, 0x38, 0xe1, 0x8a, 0x49,
+	0xe6, 0x61, 0x87, 0x5a, 0x54, 0x20, 0xf5, 0xf2, 0x1e, 0xa2, 0xe1, 0x76, 0x5e, 0x45, 0x75, 0xdf,
+	0x5c, 0x56, 0xdd, 0xb7, 0x96, 0x54, 0xf7, 0x2b, 0x4e, 0x75, 0x6f, 0x75, 0x1d, 0x6d, 0xb7, 0xeb,
+	0x30, 0x6a, 0x7f, 0xb8, 0xa0, 0xf6, 0x5f, 0xbd, 0x4c, 0xed, 0xbf, 0x56, 0x52, 0xfb, 0xcf, 0x75,
+	0x66, 0x9d, 0x4b, 0x76, 0x66, 0xdd, 0xd2, 0xce, 0x8c, 0xfd, 0x64, 0xde, 0xe3, 0x03, 0x3e, 0x4c,
+	0xd2, 0xd1, 0xab, 0xf2, 0x78, 0xf6, 0x75, 0x58, 0xcd, 0xa7, 0x8f, 0xce, 0xf0, 0xc0, 0x24, 0x2a,
+	0x4a, 0xb0, 0x1a, 0xc9, 0x0e, 0xbd, 0x78, 0x50, 0x38, 0xc2, 0xd3, 0x75, 0xbb, 0xc7, 0xcb, 0x7c,
+	0x80, 0x60, 0xbf, 0xa8, 0xc2, 0x86, 0xd5, 0xeb, 0xff, 0x7f, 0xf9, 0x69, 0xfb, 0x65, 0xfd, 0xb4,
+	0x5d, 0xf8, 0x29, 0xdb, 0x87, 0xd7, 0x2c, 0x08, 0x08, 0x4d, 0x4c, 0x3e, 0x4d, 0xd2, 0xc6, 0x7d,
+	0x1f, 0x98, 0x83, 0x2b, 0x50, 0x7c, 0x32, 0x89, 0xb8, 0xa7, 0x82, 0x9a, 0x95, 0x9f, 0xc9, 0xdc,
+	0x7b, 0x87, 0xf5, 0x05, 0xf3, 0xcf, 0x55, 0xe8, 0x16, 0x17, 0x3e, 0x5e, 0x3a, 0xe8, 0x64, 0xd8,
+	0x8a, 0x69, 0x27, 0xc3, 0xdf, 0x94, 0x9e, 0x13, 0x5d, 0x9f, 0x89, 0x04, 0x8f, 0x2e, 0xca, 0x2f,
+	0x36, 0x02, 0x7d, 0x25, 0x30, 0x28, 0x86, 0x47, 0xd5, 0x69, 0x47, 0x35, 0x42, 0x7a, 0x38, 0xa1,
+	0xc2, 0x4e, 0x41, 0x2e, 0x47, 0xb8, 0x27, 0x36, 0x78, 0x0a, 0x6d, 0xfa, 0x4d, 0xb5, 0xe2, 0xf9,
+	0xe4, 0x38, 0x19, 0xab, 0x87, 0x52, 0x35, 0x32, 0x8e, 0x0d, 0xac, 0x63, 0xa3, 0x0f, 0x42, 0x78,
+	0xdc, 0x88, 0x96, 0x8a, 0xb0, 0xab, 0xc4, 0x31, 0x47, 0xa7, 0x0f, 0x21, 0x61, 0x1a, 0x2a, 0xae,
+	0x2d, 0xd9, 0x62, 0x16, 0x14, 0x4c, 0x1b, 0xd9, 0x6c, 0x38, 0xe4, 0x59, 0xd6, 0x7b, 0x9d, 0x8c,
+	0xd3, 0x43, 0xf6, 0x77, 0xf5, 0x71, 0x83, 0x1a, 0xca, 0x47, 0xc7, 0x14, 0xb7, 0x0b, 0xdf, 0x9a,
+	0xcc, 0xd7, 0xa2, 0xaa, 0xf3, 0x25, 0xf4, 0xa2, 0x97, 0xa6, 0xb7, 0xa0, 0x3b, 0x0d, 0xf1, 0xd6,
+	0x78, 0x6a, 0xbe, 0x37, 0xad, 0x05, 0x0e, 0x35, 0x3f, 0xdf, 0xa3, 0x68, 0xc2, 0x15, 0xaa, 0x05,
+	0xc1, 0xbf, 0x09, 0x35, 0x71, 0x26, 0x3f, 0x40, 0xae, 0xee, 0xfa, 0xca, 0xb7, 0x8e, 0x8a, 0xcf,
+	0xe6, 0x01, 0x4e, 0xb3, 0xbf, 0xaa, 0x8f, 0x48, 0xa6, 0x51, 0xd4, 0x86, 0x5e, 0xd6, 0xb0, 0xf6,
+	0x57, 0x36, 0xac, 0xfd, 0x82, 0x86, 0xad, 0x17, 0x86, 0xb5, 0xc9, 0x88, 0xdd, 0xcf, 0x6b, 0xd0,
+	0xce, 0xff, 0x28, 0xe0, 0x7f, 0x1f, 0x56, 0xf6, 0xb9, 0xa0, 0xe0, 0xf0, 0xd7, 0xf3, 0x98, 0x7a,
+	0x7e, 0x28, 0xd2, 0x28, 0x3e, 0xe9, 0xbf, 0x39, 0x5f, 0xc3, 0x5a, 0xdf, 0x2e, 0x59, 0xc5, 0x7f,
+	0x17, 0xe0, 0x49, 0x94, 0x09, 0x15, 0xa6, 0x9d, 0x42, 0xc4, 0x87, 0xd1, 0xb8, 0xdf, 0x2f, 0x8b,
+	0x52, 0xc9, 0xca, 0x2a, 0xfe, 0x47, 0xe0, 0xef, 0x73, 0x72, 0x37, 0x33, 0x65, 0xde, 0x28, 0x44,
+	0x94, 0xa5, 0xd4, 0xfe, 0xc2, 0xc8, 0x67, 0x15, 0xff, 0x10, 0xba, 0xda, 0x9a, 0x4b, 0x4a, 0x7b,
+	0x73, 0x69, 0x45, 0x92, 0x4d, 0x59, 0xc5, 0x7f, 0x0f, 0xd6, 0xf7, 0xb9, 0xa0, 0xa0, 0xcf, 0xef,
+	0xbb, 0x6e, 0x21, 0x16, 0x0f, 0xa1, 0x7f, 0xd5, 0x15, 0x43, 0xec, 0xac, 0xe2, 0xdf, 0x82, 0xe6,
+	0x41, 0x76, 0x78, 0x1e, 0x0f, 0x5d, 0x68, 0x36, 0xd4, 0xf0, 0x20, 0xdb, 0x0b, 0x67, 0x27, 0xa7,
+	0xe2, 0x93, 0x29, 0xab, 0x1c, 0x37, 0xe9, 0xdf, 0x17, 0xf7, 0xfe, 0x17, 0x00, 0x00, 0xff, 0xff,
+	0x39, 0x2e, 0xe7, 0xcd, 0xca, 0x21, 0x00, 0x00,
 }

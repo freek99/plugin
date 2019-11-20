@@ -5,16 +5,14 @@
 package para
 
 import (
-	"github.com/stretchr/testify/assert"
-	//"github.com/stretchr/testify/mock"
 	"encoding/hex"
-	"errors"
-	"math/rand"
+
+	"github.com/stretchr/testify/assert"
+
 	"testing"
-	"time"
 
 	apimocks "github.com/33cn/chain33/client/mocks"
-	"github.com/33cn/chain33/common/address"
+
 	"github.com/33cn/chain33/common/crypto"
 	"github.com/33cn/chain33/queue"
 	qmocks "github.com/33cn/chain33/queue/mocks"
@@ -27,69 +25,40 @@ import (
 )
 
 var (
-	Amount = int64(1 * types.Coin)
+	Amount = 1 * types.Coin
 	Title  = string("user.p.para.")
 	Title2 = string("user.p.test.")
 )
 
 func TestFilterTxsForPara(t *testing.T) {
-	cfg, _ := types.InitCfg("../../../plugin/dapp/paracross/cmd/build/chain33.para.test.toml")
-	types.Init(Title, cfg)
+	cfg := types.NewChain33Config(types.ReadFile("../../../plugin/dapp/paracross/cmd/build/chain33.para.test.toml"))
 
-	detail, filterTxs, _ := createTestTxs(t)
-	rst := paraexec.FilterTxsForPara(Title, detail)
+	detail, filterTxs, _ := createTestTxs(cfg, t)
+	rst := paraexec.FilterTxsForPara(cfg, detail.FilterParaTxsByTitle(cfg, Title))
 
 	assert.Equal(t, filterTxs, rst)
 
 }
 
-func createCrossMainTx(to string) (*types.Transaction, error) {
+func createCrossParaTx(cfg *types.Chain33Config, to string, amount int64) (*types.Transaction, error) {
 	param := types.CreateTx{
-		To:          string(to),
-		Amount:      Amount,
-		Fee:         0,
-		Note:        []byte("test asset transfer"),
-		IsWithdraw:  false,
-		IsToken:     false,
-		TokenSymbol: "",
-		ExecName:    pt.ParaX,
-	}
-	transfer := &pt.ParacrossAction{}
-	v := &pt.ParacrossAction_AssetTransfer{AssetTransfer: &types.AssetsTransfer{
-		Amount: param.Amount, Note: param.GetNote(), To: param.GetTo()}}
-	transfer.Value = v
-	transfer.Ty = pt.ParacrossActionAssetTransfer
-
-	tx := &types.Transaction{
-		Execer:  []byte(param.GetExecName()),
-		Payload: types.Encode(transfer),
-		To:      address.ExecAddress(param.GetExecName()),
-		Fee:     param.Fee,
-		Nonce:   rand.New(rand.NewSource(time.Now().UnixNano())).Int63(),
-	}
-
-	return tx, nil
-}
-
-func createCrossParaTx(to string, amount int64) (*types.Transaction, error) {
-	param := types.CreateTx{
-		To:          string(to),
+		To:          to,
 		Amount:      amount,
 		Fee:         0,
 		Note:        []byte("test asset transfer"),
 		IsWithdraw:  false,
 		IsToken:     false,
 		TokenSymbol: "",
-		ExecName:    types.ExecName(pt.ParaX),
+		ExecName:    cfg.ExecName(pt.ParaX),
 	}
-	tx, err := pt.CreateRawAssetTransferTx(&param)
+	tx, err := pt.CreateRawAssetTransferTx(cfg, &param)
 
 	return tx, err
 }
 
-func createCrossParaTempTx(to string, amount int64) (*types.Transaction, error) {
+func createCrossParaTempTx(cfg *types.Chain33Config, to string, amount int64) (*types.Transaction, error) {
 	param := types.CreateTx{
-		To:          string(to),
+		To:          to,
 		Amount:      amount,
 		Fee:         0,
 		Note:        []byte("test asset transfer"),
@@ -98,67 +67,53 @@ func createCrossParaTempTx(to string, amount int64) (*types.Transaction, error) 
 		TokenSymbol: "",
 		ExecName:    Title2 + pt.ParaX,
 	}
-	tx, err := pt.CreateRawAssetTransferTx(&param)
+	tx, err := pt.CreateRawAssetTransferTx(cfg, &param)
 
 	return tx, err
 }
 
-func createTxsGroup(txs []*types.Transaction) ([]*types.Transaction, error) {
+func createTxsGroup(cfg *types.Chain33Config, txs []*types.Transaction) ([]*types.Transaction, error) {
 
-	group, err := types.CreateTxGroup(txs)
+	group, err := types.CreateTxGroup(txs, cfg.GInt("MinFee"))
 	if err != nil {
 		return nil, err
 	}
-	err = group.Check(0, types.GInt("MinFee"), types.GInt("MaxFee"))
+	err = group.Check(cfg, 0, cfg.GInt("MinFee"), cfg.GInt("MaxFee"))
 	if err != nil {
 		return nil, err
 	}
 	return group.Txs, nil
 }
 
-func TestGetBlockHashForkHeightOnMainChain(t *testing.T) {
-	para := new(client)
-	grpcClient := &typesmocks.Chain33Client{}
-	grpcClient.On("GetFork", mock.Anything, &types.ReqKey{Key: []byte("ForkBlockHash")}).Return(&types.Int64{Data: 1}, errors.New("err")).Once()
-	para.grpcClient = grpcClient
-	_, err := para.GetForkHeightOnMainChain("ForkBlockHash")
-	assert.NotNil(t, err)
-	grpcClient.On("GetFork", mock.Anything, &types.ReqKey{Key: []byte("ForkBlockHash")}).Return(&types.Int64{Data: 1}, nil).Once()
-	ret, err := para.GetForkHeightOnMainChain("ForkBlockHash")
-	assert.Nil(t, err)
-	assert.Equal(t, int64(1), ret)
-
-}
-
-func createTestTxs(t *testing.T) (*types.BlockDetail, []*types.Transaction, []*types.Transaction) {
+func createTestTxs(cfg *types.Chain33Config, t *testing.T) (*types.BlockDetail, []*types.Transaction, []*types.Transaction) {
 	//all para tx group
-	tx5, err := createCrossParaTx("toB", 5)
+	tx5, err := createCrossParaTx(cfg, "toB", 5)
 	assert.Nil(t, err)
-	tx6, err := createCrossParaTx("toB", 6)
+	tx6, err := createCrossParaTx(cfg, "toB", 6)
 	assert.Nil(t, err)
 	tx56 := []*types.Transaction{tx5, tx6}
-	txGroup56, err := createTxsGroup(tx56)
+	txGroup56, err := createTxsGroup(cfg, tx56)
 	assert.Nil(t, err)
 
 	//para cross tx group fail
-	tx7, _ := createCrossParaTx("toA", 1)
-	tx8, err := createCrossParaTx("toB", 8)
+	tx7, _ := createCrossParaTx(cfg, "toA", 1)
+	tx8, err := createCrossParaTx(cfg, "toB", 8)
 	assert.Nil(t, err)
 	tx78 := []*types.Transaction{tx7, tx8}
-	txGroup78, err := createTxsGroup(tx78)
+	txGroup78, err := createTxsGroup(cfg, tx78)
 	assert.Nil(t, err)
 
 	//all para tx group
-	txB, err := createCrossParaTx("toB", 11)
+	txB, err := createCrossParaTx(cfg, "toB", 11)
 	assert.Nil(t, err)
-	txC, err := createCrossParaTx("toB", 12)
+	txC, err := createCrossParaTx(cfg, "toB", 12)
 	assert.Nil(t, err)
 	txBC := []*types.Transaction{txB, txC}
-	txGroupBC, err := createTxsGroup(txBC)
+	txGroupBC, err := createTxsGroup(cfg, txBC)
 	assert.Nil(t, err)
 
 	//single para tx
-	txD, err := createCrossParaTempTx("toB", 10)
+	txD, err := createCrossParaTempTx(cfg, "toB", 10)
 	assert.Nil(t, err)
 
 	txs := []*types.Transaction{}
@@ -196,6 +151,7 @@ func createTestTxs(t *testing.T) (*types.BlockDetail, []*types.Transaction, []*t
 }
 
 func TestAddMinerTx(t *testing.T) {
+	cfg := types.NewChain33Config(types.ReadFile("../../../plugin/dapp/paracross/cmd/build/chain33.para.test.toml"))
 	pk, err := hex.DecodeString(minerPrivateKey)
 	assert.Nil(t, err)
 
@@ -205,23 +161,28 @@ func TestAddMinerTx(t *testing.T) {
 	priKey, err := secp.PrivKeyFromBytes(pk)
 	assert.Nil(t, err)
 
-	mainForkParacrossCommitTx = 1
 	block := &types.Block{}
 
-	mainDetail, filterTxs, allTxs := createTestTxs(t)
-	mainBlock := &types.BlockSeq{
-		Seq:    &types.BlockSequence{},
-		Detail: mainDetail}
-	para := new(client)
+	_, filterTxs, _ := createTestTxs(cfg, t)
+	localBlock := &pt.ParaLocalDbBlock{
+		Height:     1,
+		MainHeight: 10,
+		MainHash:   []byte("mainhash"),
+		Txs:        filterTxs}
+
+	api := new(apimocks.QueueProtocolAPI)
+	api.On("GetConfig", mock.Anything).Return(cfg, nil)
+	para := &client{BaseClient: &drivers.BaseClient{}}
+	para.SetAPI(api)
+	para.subCfg = new(subConfig)
 	para.privateKey = priKey
-	para.addMinerTx(nil, block, mainBlock, allTxs)
+	para.commitMsgClient = new(commitMsgClient)
+	para.commitMsgClient.paraClient = para
 
-	ret := checkTxInMainBlock(filterTxs[0], mainDetail)
-	assert.True(t, ret)
-
-	tx2, _ := createCrossMainTx("toA")
-	ret = checkTxInMainBlock(tx2, mainDetail)
-	assert.False(t, ret)
+	para.blockSyncClient = new(blockSyncClient)
+	para.blockSyncClient.paraClient = para
+	para.blockSyncClient.addMinerTx(nil, block, localBlock)
+	assert.Equal(t, 1, len(block.Txs))
 
 }
 
@@ -229,38 +190,97 @@ func initBlock() {
 	println("initblock")
 }
 
-func TestGetLastBlockInfo(t *testing.T) {
-	para := new(client)
-
+func getMockLastBlock(para *client, returnBlock *types.Block) {
 	baseCli := drivers.NewBaseClient(&types.Consensus{Name: "name"})
 	para.BaseClient = baseCli
-	grpcClient := &typesmocks.Chain33Client{}
+
 	qClient := &qmocks.Client{}
 	para.InitClient(qClient, initBlock)
+
+	msg := queue.NewMessage(0, "", 1, returnBlock)
+
+	qClient.On("NewMessage", "blockchain", int64(types.EventGetLastBlock), mock.Anything).Return(msg)
+	qClient.On("Send", mock.Anything, mock.Anything).Return(nil)
+
+	qClient.On("Wait", mock.Anything).Return(msg, nil)
+}
+
+func TestGetLastBlockInfo(t *testing.T) {
+	para := new(client)
+	grpcClient := &typesmocks.Chain33Client{}
+	para.grpcClient = grpcClient
+
+	block := &types.Block{Height: 0}
+	getMockLastBlock(para, block)
 
 	api := &apimocks.QueueProtocolAPI{}
 	para.SetAPI(api)
 
-	para.grpcClient = grpcClient
-
-	block := &types.Block{Height: 0}
-	msg := queue.NewMessage(0, "", 1, block)
-
-	qClient.On("NewMessage", mock.Anything, mock.Anything, mock.Anything).Return(msg)
-	qClient.On("Send", mock.Anything, mock.Anything).Return(nil)
-
-	qClient.On("Wait", mock.Anything).Return(msg, nil)
-
-	api.On("GetMainSequenceByHash", mock.Anything).Return(&types.Int64{Data: int64(1)}, nil)
-	mainBlock := &types.Block{ParentHash: []byte("phash")}
-	mainDetail := &types.BlockDetail{Block: mainBlock}
-	blocks := &types.BlockDetails{}
-	blocks.Items = append(blocks.Items, mainDetail)
-	grpcClient.On("GetBlockByHashes", mock.Anything, mock.Anything).Return(blocks, nil)
 	grpcClient.On("GetSequenceByHash", mock.Anything, mock.Anything).Return(&types.Int64{Data: int64(10)}, nil)
 
-	mainSeq, hash, err := para.getLastBlockMainInfo()
+	mainSeq, lastBlock, err := para.getLastBlockMainInfo()
 	assert.NoError(t, err)
-	assert.Equal(t, int64(9), mainSeq)
-	assert.Equal(t, []byte("phash"), hash)
+	assert.Equal(t, int64(10), mainSeq)
+	assert.Equal(t, lastBlock.Height, block.Height)
+}
+
+func TestGetEmptyInterval(t *testing.T) {
+	int1 := &emptyBlockInterval{BlockHeight: 0, Interval: 1}
+	int2 := &emptyBlockInterval{BlockHeight: 10, Interval: 10}
+	int3 := &emptyBlockInterval{BlockHeight: 15, Interval: 15}
+
+	ints := []*emptyBlockInterval{int1, int2, int3}
+	para := new(client)
+	para.subCfg = &subConfig{EmptyBlockInterval: ints}
+
+	lastBlock := &pt.ParaLocalDbBlock{Height: 1}
+	ret := para.getEmptyInterval(lastBlock)
+	assert.Equal(t, int1.Interval, ret)
+
+	lastBlock = &pt.ParaLocalDbBlock{Height: 10}
+	ret = para.getEmptyInterval(lastBlock)
+	assert.Equal(t, int2.Interval, ret)
+
+	lastBlock = &pt.ParaLocalDbBlock{Height: 11}
+	ret = para.getEmptyInterval(lastBlock)
+	assert.Equal(t, int2.Interval, ret)
+
+	lastBlock = &pt.ParaLocalDbBlock{Height: 16}
+	ret = para.getEmptyInterval(lastBlock)
+	assert.Equal(t, int3.Interval, ret)
+
+}
+
+func TestCheckEmptyInterval(t *testing.T) {
+	int1 := &emptyBlockInterval{BlockHeight: 0, Interval: 1}
+	int2 := &emptyBlockInterval{BlockHeight: 10, Interval: 10}
+	int3 := &emptyBlockInterval{BlockHeight: 15, Interval: 15}
+
+	int1.BlockHeight = 5
+	ints := []*emptyBlockInterval{int1, int2, int3}
+	err := checkEmptyBlockInterval(ints)
+	assert.Equal(t, types.ErrInvalidParam, err)
+	int1.BlockHeight = 0
+
+	int3.BlockHeight = 5
+	ints = []*emptyBlockInterval{int1, int2, int3}
+	err = checkEmptyBlockInterval(ints)
+	assert.Equal(t, types.ErrInvalidParam, err)
+
+	int3.BlockHeight = 10
+	ints = []*emptyBlockInterval{int1, int2, int3}
+	err = checkEmptyBlockInterval(ints)
+	assert.Equal(t, types.ErrInvalidParam, err)
+	int3.BlockHeight = 15
+
+	int2.Interval = 0
+	ints = []*emptyBlockInterval{int1, int2, int3}
+	err = checkEmptyBlockInterval(ints)
+	assert.Equal(t, types.ErrInvalidParam, err)
+
+	int2.Interval = 2
+	ints = []*emptyBlockInterval{int1, int2, int3}
+	err = checkEmptyBlockInterval(ints)
+	assert.Equal(t, nil, err)
+
 }

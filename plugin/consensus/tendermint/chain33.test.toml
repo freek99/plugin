@@ -70,23 +70,11 @@ minerstart=false
 
 [mver.consensus]
 fundKeyAddr = "1BQXS6TxaYYG5mADaWij4AxhZZUTpw95a5"
-coinReward = 18
-coinDevFund = 12
-ticketPrice = 10000
 powLimitBits = "0x1f00ffff"
-retargetAdjustmentFactor = 4
-futureBlockTime = 16
-ticketFrozenTime = 5    #5s only for test
-ticketWithdrawTime = 10 #10s only for test
-ticketMinerWaitTime = 2 #2s only for test
 maxTxNumber = 1600      #160
-targetTimespan = 2304
-targetTimePerBlock = 16
 
 [mver.consensus.ForkChainParamV1]
 maxTxNumber = 10000
-targetTimespan = 288 #only for test
-targetTimePerBlock = 2
 
 [mver.consensus.ForkChainParamV2]
 powLimitBits = "0x1f2fffff"
@@ -95,17 +83,17 @@ powLimitBits = "0x1f2fffff"
 genesis="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
 genesisBlockTime=1514533394
 timeoutTxAvail=1000
-timeoutPropose=3000
+timeoutPropose=1000
 timeoutProposeDelta=500
 timeoutPrevote=1000
 timeoutPrevoteDelta=500
 timeoutPrecommit=1000
 timeoutPrecommitDelta=500
-timeoutCommit=1000
+timeoutCommit=500
 skipTimeoutCommit=false
-createEmptyBlocks=false
-createEmptyBlocksInterval=0
-validatorNodes=["127.0.0.1:46656"]
+createEmptyBlocks=true
+createEmptyBlocksInterval=1
+validatorNodes=["127.0.0.1:46656", "127.0.0.2:46656"]
 
 [store]
 name="kvdb"

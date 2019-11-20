@@ -60,16 +60,23 @@ func addBakupCmdFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64P("delay", "d", 60, "delay period (minimum 60 seconds)")
 	cmd.MarkFlagRequired("delay")
 
-	defaultFee := float64(types.GInt("MinFee")) / float64(types.Coin)
-	cmd.Flags().Float64P("fee", "f", defaultFee, "transaction fee")
+	cmd.Flags().Float64P("fee", "f", 0.0, "transaction fee")
 }
 
 func backupCmd(cmd *cobra.Command, args []string) {
+	title, _ := cmd.Flags().GetString("title")
+	cfg := types.GetCliSysParam(title)
+
 	rpcLaddr, _ := cmd.Flags().GetString("rpc_laddr")
 	backup, _ := cmd.Flags().GetString("backup")
 	defaultAddr, _ := cmd.Flags().GetString("default")
 	delay, _ := cmd.Flags().GetInt64("delay")
+
+	defaultFee := float64(cfg.GInt("MinFee")) / float64(types.Coin)
 	fee, _ := cmd.Flags().GetFloat64("fee")
+	if fee < defaultFee {
+		fee = defaultFee
+	}
 
 	if delay < 60 {
 		fmt.Println("delay period changed to 60")
@@ -103,15 +110,34 @@ func addRetrieveCmdFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("default", "t", "", "default address")
 	cmd.MarkFlagRequired("default")
 
-	defaultFee := float64(types.GInt("MinFee")) / float64(types.Coin)
-	cmd.Flags().Float64P("fee", "f", defaultFee, "sign address")
+	cmd.Flags().Float64P("fee", "f", 0.0, "sign address")
+}
+
+func addPerformCmdFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP("backup", "b", "", "backup address")
+	cmd.MarkFlagRequired("backup")
+	cmd.Flags().StringP("default", "t", "", "default address")
+	cmd.MarkFlagRequired("default")
+
+	cmd.Flags().StringArrayP("exec", "e", []string{}, "asset exec")
+	cmd.Flags().StringArrayP("symbol", "s", []string{}, "asset symbol")
+
+	cmd.Flags().Float64P("fee", "f", 0.0, "sign address")
 }
 
 func prepareCmd(cmd *cobra.Command, args []string) {
+	title, _ := cmd.Flags().GetString("title")
+	cfg := types.GetCliSysParam(title)
+
 	rpcLaddr, _ := cmd.Flags().GetString("rpc_laddr")
 	backup, _ := cmd.Flags().GetString("backup")
 	defaultAddr, _ := cmd.Flags().GetString("default")
+
+	defaultFee := float64(cfg.GInt("MinFee")) / float64(types.Coin)
 	fee, _ := cmd.Flags().GetFloat64("fee")
+	if fee < defaultFee {
+		fee = defaultFee
+	}
 
 	feeInt64 := int64(fee*types.InputPrecision) * types.Multiple1E4
 	params := rpc.RetrievePrepareTx{
@@ -130,22 +156,42 @@ func PerformCmd() *cobra.Command {
 		Short: "Perform the retrieve",
 		Run:   performCmd,
 	}
-	addRetrieveCmdFlags(cmd)
+	addPerformCmdFlags(cmd)
 	return cmd
 }
 
 func performCmd(cmd *cobra.Command, args []string) {
+	title, _ := cmd.Flags().GetString("title")
+	cfg := types.GetCliSysParam(title)
+
 	rpcLaddr, _ := cmd.Flags().GetString("rpc_laddr")
 	backup, _ := cmd.Flags().GetString("backup")
 	defaultAddr, _ := cmd.Flags().GetString("default")
+
+	defaultFee := float64(cfg.GInt("MinFee")) / float64(types.Coin)
 	fee, _ := cmd.Flags().GetFloat64("fee")
+	if fee < defaultFee {
+		fee = defaultFee
+	}
+
+	execs, _ := cmd.Flags().GetStringArray("exec")
+	symbols, _ := cmd.Flags().GetStringArray("symbol")
 
 	feeInt64 := int64(fee*types.InputPrecision) * types.Multiple1E4
 	params := rpc.RetrievePerformTx{
 		BackupAddr:  backup,
 		DefaultAddr: defaultAddr,
+		Assets:      []rpc.Asset{},
 		Fee:         feeInt64,
 	}
+	if len(execs) != len(symbols) {
+		fmt.Printf("exec count must equal to symbol count\n")
+		return
+	}
+	for i := 0; i < len(execs); i++ {
+		params.Assets = append(params.Assets, rpc.Asset{Exec: execs[i], Symbol: symbols[i]})
+	}
+
 	ctx := jsonrpc.NewRPCCtx(rpcLaddr, "retrieve.CreateRawRetrievePerformTx", params, nil)
 	ctx.RunWithoutMarshal()
 }
@@ -162,10 +208,18 @@ func CancelCmd() *cobra.Command {
 }
 
 func cancelCmd(cmd *cobra.Command, args []string) {
+	title, _ := cmd.Flags().GetString("title")
+	cfg := types.GetCliSysParam(title)
+
 	rpcLaddr, _ := cmd.Flags().GetString("rpc_laddr")
 	backup, _ := cmd.Flags().GetString("backup")
 	defaultAddr, _ := cmd.Flags().GetString("default")
+
+	defaultFee := float64(cfg.GInt("MinFee")) / float64(types.Coin)
 	fee, _ := cmd.Flags().GetFloat64("fee")
+	if fee < defaultFee {
+		fee = defaultFee
+	}
 
 	feeInt64 := int64(fee*types.InputPrecision) * types.Multiple1E4
 	params := rpc.RetrieveCancelTx{
@@ -181,7 +235,7 @@ func cancelCmd(cmd *cobra.Command, args []string) {
 func RetrieveQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "query",
-		Short: "Backup the wallet",
+		Short: "show retrieve info",
 		Run:   queryRetrieveCmd,
 	}
 	addQueryRetrieveCmdFlags(cmd)
@@ -193,6 +247,9 @@ func addQueryRetrieveCmdFlags(cmd *cobra.Command) {
 	cmd.MarkFlagRequired("backup")
 	cmd.Flags().StringP("default", "t", "", "default address")
 	cmd.MarkFlagRequired("default")
+
+	cmd.Flags().StringP("asset_exec", "e", "", "asset exec")
+	cmd.Flags().StringP("asset_symbol", "s", "", "asset symbol")
 }
 
 func parseRerieveDetail(arg interface{}) (interface{}, error) {
@@ -221,10 +278,14 @@ func queryRetrieveCmd(cmd *cobra.Command, args []string) {
 	rpcLaddr, _ := cmd.Flags().GetString("rpc_laddr")
 	backup, _ := cmd.Flags().GetString("backup")
 	defaultAddr, _ := cmd.Flags().GetString("default")
+	exec, _ := cmd.Flags().GetString("asset_exec")
+	symbol, _ := cmd.Flags().GetString("asset_symbol")
 
 	req := &rt.ReqRetrieveInfo{
 		BackupAddress:  backup,
 		DefaultAddress: defaultAddr,
+		AssetExec:      exec,
+		AssetSymbol:    symbol,
 	}
 
 	var params rpctypes.Query4Jrpc
